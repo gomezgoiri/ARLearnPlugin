@@ -27,9 +27,8 @@ if (elgg_instanceof($container, 'group')) {
 wespot_arlearn_prepare_parent_breadcrumbs($task);
 elgg_push_breadcrumb($title);
 
-$group = get_entity(elgg_get_page_owner_guid());
-//if (elgg_get_logged_in_user_guid() == $group->owner_guid) {
-if ($group->canEdit()) {
+$group = elgg_get_page_owner_entity();  // or get_entity(elgg_get_page_owner_guid());
+if ($group && $group->canEdit()) {  // $group is false if it has no owner.
 	elgg_register_title_button();
 }
 
