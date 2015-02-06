@@ -7,7 +7,7 @@ $task_guid = get_input('guid');
 $task = get_entity($task_guid);
 $container = $task->getContainerEntity();
 
-elgg_set_page_owner_guid($container->getGUID());
+elgg_set_page_owner_guid($task->getContainerGUID());
 
 if (elgg_instanceof($container, 'group')) {
 	elgg_push_breadcrumb(elgg_echo('wespot_arlearn:owner', array($container->name)), "wespot_arlearn/group/$container->guid/all");
