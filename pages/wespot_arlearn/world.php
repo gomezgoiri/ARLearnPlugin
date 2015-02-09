@@ -9,8 +9,7 @@ elgg_pop_breadcrumb();
 elgg_push_breadcrumb(elgg_echo('wespot_arlearn'));
 
 $group = get_entity(elgg_get_page_owner_guid());
-//if (elgg_get_logged_in_user_guid() == $group->owner_guid) {
-if ($group->canEdit()) {
+if ($group && $group->canEdit()) { // $group is false if it has no owner.
 	elgg_register_title_button();
 }
 
