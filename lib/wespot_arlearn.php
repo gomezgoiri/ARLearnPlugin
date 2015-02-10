@@ -75,18 +75,13 @@ function getExistingEntities($arlearnid) {
 function extractTitleFromResponse($response) {
   $decodedResponseValue = json_decode($response->responseValue);
   $allresponsevars = get_object_vars($decodedResponseValue);  
-
-  foreach ($allresponsevars as $key => $value) {
-    //$typename = $key;
-    if ($key == 'imageUrl'
-      || $key == 'videoUrl'
-      || $key == 'audioUrl'
-      || $key == 'text') {
-      debugWespotARLearn('PROCESSING RESULT FOR title =: '.print_r($value, true));
-      return $value;
+  $possibleFields = array('imageUrl', 'videoUrl', 'audioUrl', 'text');
+  foreach ($possibleFields as $fieldName) {
+    if (array_key_exists($fieldName, $allresponsevars)) {
+      debugWespotARLearn('PROCESSING RESULT FOR title =: '.print_r($allresponsevars[$fieldName], true));
+      return $allresponsevars[$fieldName];
     }
   }
-
   debugWespotARLearn('PROCESSING RESULT FOR allresponsevars =: '.print_r($allresponsevars, true));
   return "";
 }
