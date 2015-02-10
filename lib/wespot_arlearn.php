@@ -167,17 +167,11 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
             if ($taskArray && count($taskArray) > 0) {
               $task = $taskArray[0];
-              $task_guid = $task->guid;
-              debugWespotARLearn('PROCESSING RESULT FOR task_guid =: '.print_r($task_guid, true));
-
-              $task = get_entity($task_guid);
-              $type = $task->task_type;
-
               $title = extractTitleFromResponse($response);
-
+              
               // Don't save an item with no title.
               if ($title != "") {
-                elgg_set_ignore_access(true);  
+                elgg_push_context('backend_access');
                 $result = new ElggObject();
                 $result->subtype = 'arlearntask';
                 $result->owner_guid = $user->guid;
@@ -188,9 +182,9 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
                 //MB: GROUP LEVEL ACCESS ONLY - CHANGED TO PUBLIC FOR NOW
                 //$result->access_id=$group->group_acl; //owner group only
                 $result->access_id=ACCESS_PUBLIC;
-                $result->task_type = $type;
                 $result->title = $title;
-                $result->parent_guid = $task_guid;
+                $result->parent_guid = $task->guid;
+                $result->task_type = $task->task_type;
                 $result->description = '';
                 $result->arlearnid = $responseid;
                 $result->arlearnrunid = $runid;
@@ -205,7 +199,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
                 // Add to river
                 add_to_river('river/object/arlearntask/create', 'create', $user->guid, $result->guid);
-                elgg_set_ignore_access(false);  
+                elgg_pop_context();
               }
             }
           }
