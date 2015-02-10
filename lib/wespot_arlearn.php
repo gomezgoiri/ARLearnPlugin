@@ -72,6 +72,31 @@ function getExistingEntities($arlearnid) {
   return $elggresponseArray;
 }
 
+function getUser($providername, $useroauth) {
+  $user_uid = $providername . "_" . $useroauth;
+  $options = array(
+    'type' => 'user',
+    'plugin_id' => 'elgg_social_login',
+    'plugin_user_setting_name_value_pairs' => array(
+      'uid' => $user_uid,
+      'provider' => $providername,
+    ),
+    'plugin_user_setting_name_value_pairs_operator' => 'AND',
+    'limit' => 0
+  );
+  $users = elgg_get_entities_from_plugin_user_settings($options);
+  $cusers = count($users);
+
+  if ($cusers==1) {
+    return $users[0];
+  } elseif ($cusers==0) {
+    debugWespotARLearn('No user found for '.$user_uid.'.');
+  } else {
+    debugWespotARLearn('More than a user was found: '.print_r($users, true));
+  }
+  return null;
+}
+
 function extractTitleFromResponse($response) {
   $decodedResponseValue = json_decode($response->responseValue);
   $allresponsevars = get_object_vars($decodedResponseValue);  
@@ -99,9 +124,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
   debugWespotARLearn('resumptiontoken in getChildrenFromARLearn: '.print_r($resumptiontoken, true));
 
-  $gameid = $game->arlearn_gameid;
   $runid = $game->arlearn_runid;
-
   $results = getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken);
 
   if ($results != false) {
@@ -138,24 +161,8 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
           $useroauth = $userbits[1];
           $providername = getElggProviderName($userprovidercode);
 
-          $user_uid = $providername . "_" . $useroauth;
-          $options = array(
-            'type' => 'user',
-            'plugin_id' => 'elgg_social_login',
-            'plugin_user_setting_name_value_pairs' => array(
-              'uid' => $user_uid,
-              'provider' => $providername,
-            ),
-            'plugin_user_setting_name_value_pairs_operator' => 'AND',
-            'limit' => 0
-          );
-
-          $users = elgg_get_entities_from_plugin_user_settings($options);
-
-          debugWespotARLearn('PROCESSING RESULT FOR TASK USER =: '.print_r($users, true));
-
-          if (count($users) == 1) {
-            $user = $users[0];
+          $user = getUser($providername, $useroauth);
+          if ($user!=null) {
             $taskArray = elgg_get_entities_from_metadata(array(
               'type' => 'object',
               'subtype' => 'arlearntask_top',
@@ -168,7 +175,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
             if ($taskArray && count($taskArray) > 0) {
               $task = $taskArray[0];
               $title = extractTitleFromResponse($response);
-              
+
               // Don't save an item with no title.
               if ($title != "") {
                 elgg_push_context('backend_access');
