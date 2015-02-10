@@ -116,7 +116,6 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
         // Don't save if we already have it
         if (!$existingObjects or count($existingObjects) == 0) {
-          $responseValue = $response->responseValue;
           debugWespotARLearn("Receiving info... ");
           $userinfo = $response->userEmail;
           $userbits = split(":", $userinfo);
@@ -159,8 +158,9 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
               $task = get_entity($task_guid);
               $type = $task->task_type;
+              
               $title="";
-              $decodedResponseValue = json_decode($responseValue);
+              $decodedResponseValue = json_decode($response->responseValue);
               $allresponsevars = get_object_vars($decodedResponseValue);
 
               debugWespotARLearn('PROCESSING RESULT FOR allresponsevars =: '.print_r($allresponsevars, true));
