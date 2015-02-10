@@ -387,18 +387,16 @@ function task_notify_message($hook, $entity_type, $returnvalue, $params) {
  * @param unknown_type $params
  */
 function wespot_arlearn_write_permission_check($hook, $entity_type, $returnvalue, $params) {
-
-	if ($params['entity']->getSubtype() == 'arlearntask_top') {
-		$task = $params['entity'];
-		$user = $params['user'];
-		if ($user->guid == $task->owner_guid) {
-			return true;
-		} else {
+	if (!elgg_in_context('backend_access')) {
+		if ($params['entity']->getSubtype() == 'arlearntask_top') {
+			$task = $params['entity'];
+			$user = $params['user'];
+			return ($user->guid == $task->owner_guid);
+		} else if ($params['entity']->getSubtype() == 'arlearntask') {
 			return false;
 		}
-	} else if ($params['entity']->getSubtype() == 'arlearntask') {
-		return false;
 	}
+	return $returnvalue;
 }
 
 /**
