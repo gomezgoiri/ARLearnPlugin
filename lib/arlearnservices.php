@@ -345,8 +345,6 @@ function getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken=""
 		$url .= '&resumptionToken='.$resumptiontoken;
 	}
 
-	debugWespotARLearn('url: '.print_r($url, true));
-
 	$results = callARLearnAPI("GET", $url, "", $usertoken);
 	return $results;
 }
@@ -361,6 +359,8 @@ function getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken=""
  */
 function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
 	global $weSpotElggARLearnKey;
+
+	debugWespotARLearn("HTTP ".$method."  http://".$url." (body: ".$jsondata.")");
 
 	$curl = curl_init();
     switch ($method) {
