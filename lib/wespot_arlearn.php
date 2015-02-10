@@ -72,6 +72,25 @@ function getExistingEntities($arlearnid) {
   return $elggresponseArray;
 }
 
+function extractTitleFromResponse($response) {
+  $decodedResponseValue = json_decode($response->responseValue);
+  $allresponsevars = get_object_vars($decodedResponseValue);  
+
+  foreach ($allresponsevars as $key => $value) {
+    //$typename = $key;
+    if ($key == 'imageUrl'
+      || $key == 'videoUrl'
+      || $key == 'audioUrl'
+      || $key == 'text') {
+      debugWespotARLearn('PROCESSING RESULT FOR title =: '.print_r($value, true));
+      return $value;
+    }
+  }
+
+  debugWespotARLearn('PROCESSING RESULT FOR allresponsevars =: '.print_r($allresponsevars, true));
+  return "";
+}
+
 function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptiontoken="") {
   global $LOOP_COUNT;
 
@@ -158,25 +177,8 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
               $task = get_entity($task_guid);
               $type = $task->task_type;
-              
-              $title="";
-              $decodedResponseValue = json_decode($response->responseValue);
-              $allresponsevars = get_object_vars($decodedResponseValue);
 
-              debugWespotARLearn('PROCESSING RESULT FOR allresponsevars =: '.print_r($allresponsevars, true));
-
-              foreach ($allresponsevars as $key => $value) {
-                //$typename = $key;
-                if ($key == 'imageUrl'
-                  || $key == 'videoUrl'
-                  || $key == 'audioUrl'
-                  || $key == 'text') {
-                  $title = $value;
-                  break;
-                }
-              }
-
-              debugWespotARLearn('PROCESSING RESULT FOR title =: '.print_r($title, true));
+              $title = extractTitleFromResponse($response);
 
               // Don't save an item with no title.
               if ($title != "") {
