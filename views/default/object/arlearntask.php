@@ -106,7 +106,10 @@ if ($title_link === '') {
 	if ($task->task_type == 'picture') {
 		$summary .= '<a target="_blank" href="'.$text.'"><img width="'.$imagewidth.'" border="0" src="'.$text.'" /></a>';
 	} else if ($task->task_type == 'video') {
+		$summary .= '<video width="320" height="240" controls>';
+		$summary .= '<source src="'.$text.'" type="video/ogg">';
 		$summary .= '<a target="_blank" href="'.$text.'">'.$user->name.elgg_echo("wespot_arlearn:type_1_label").'</a>';
+		$summary .= '</video>';
 	} else if ($task->task_type == 'audio') {
 		$summary .= '<audio controls>';
 		$summary .= '<source src="'.$text.'" type="audio/ogg">';
