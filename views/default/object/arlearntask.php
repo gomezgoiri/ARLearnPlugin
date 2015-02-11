@@ -108,7 +108,10 @@ if ($title_link === '') {
 	} else if ($task->task_type == 'video') {
 		$summary .= '<a target="_blank" href="'.$text.'">'.$user->name.elgg_echo("wespot_arlearn:type_1_label").'</a>';
 	} else if ($task->task_type == 'audio') {
+		$summary .= '<audio controls>';
+		$summary .= '<source src="'.$text.'" type="audio/ogg">';
 		$summary .= '<a target="_blank" href="'.$text.'">'.$user->name.elgg_echo("wespot_arlearn:type_2_label").'</a>';
+		$summary .= '</audio>';
 	} else {
 		$summary .= $text;
 	}
