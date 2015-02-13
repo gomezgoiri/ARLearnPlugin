@@ -9,42 +9,37 @@ global $LOOP_COUNT;
  * This will be slow if there are many results.
  * I did try and used a stored date, but stuff got missed out.
  * In the future, some combination of the two, to reduce results, would be good.
- *
- * It makes the call using the group owner user information,
- * but they don't have to be logged in at the time.
  */
 
-function checkARLearnForTaskChildren($group_guid) {
+function checkARLearnForTaskChildren($guid) {
 
   global $LOOP_COUNT;
 
   elgg_load_library('elgg:wespot_arlearnservices');
 
-  $gamearray = elgg_get_entities(array('type' => 'object', 'subtype' => 'arlearngame', 'owner_guid' => $group_guid));
-
-  if ($gamearray === FALSE || count($gamearray) == 0) {
+  $game = get_entity($guid);
+  if ($game === FALSE ) {
     // Don't call ARLEarn if there is no game
-    debugWespotARLearn('No game was found in Elgg\'s database.');
+    echo 'No game was found in Elgg\'s database.';
   } else {
-    $game = $gamearray[0];
-
-    $group = get_entity($group_guid);
-    $owner_giud = $group->owner_guid;
-    $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_giud, 'elgg_social_login');
-    $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_giud, 'elgg_social_login'));
-    $usertoken = createARLearnUserToken($ownerprovider, $owneroauth);
-
-    if (isset($usertoken) && $usertoken != "") {
-      $firstRun = true;
-      $fromtime = 0;
-      if (isset($game->arlearn_server_time)) {
-        $fromtime = $game->arlearn_server_time;
-      }
-      debugWespotARLearn('usertoken: '.print_r($usertoken, true));
-      debugWespotARLearn('fromtime: '.print_r($fromtime, true));
-
-      wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $fromtime);
-      getChildrenFromARLearn($usertoken, $group, $game, $fromtime);
+      $group = get_entity($game->owner_guid);
+      $owner_giud = $group->owner_guid;
+      $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_giud, 'elgg_social_login');
+      $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_giud, 'elgg_social_login'));
+      
+      if ($ownerprovider=='')
+        echo "Invalid provider for user with GUID %d " % $owner_giud;
+        return;
+      
+      $usertoken = createARLearnUserToken($ownerprovider, $owneroauth);
+      if (isset($usertoken) && $usertoken != "") {
+        $firstRun = true;
+        $fromtime = 0;
+        if (isset($game->arlearn_server_time)) {
+          $fromtime = $game->arlearn_server_time;
+        }
+        wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $fromtime);
+        getChildrenFromARLearn($usertoken, $group, $game, $fromtime);
     }
   }
 }
