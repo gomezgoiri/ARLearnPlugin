@@ -7,10 +7,6 @@
 // Each time the widget is drawn it calls ARLearn to check for new results.
 elgg_load_library('elgg:wespot_arlearn');
 
-$group_guid = elgg_get_page_owner_guid();
-checkARLearnForTaskChildren($group_guid);
-
-//print_r($vars);
 $num = (int) $vars['entity']->wespot_arlearn_num;
 
 $options = array(
@@ -35,8 +31,9 @@ if ($content) {
 } else {
 	echo elgg_echo('wespot_arlearn:none');
 
+	$group_guid = elgg_get_page_owner_guid();
 	$group = get_entity($group_guid);
-//	if (elgg_get_logged_in_user_guid() == $group->owner_guid) {
+	
 	if ($group->canEdit()) {
 		if ($group->wespot_arlearn_enable != "no") {
 			echo "<br><br>";

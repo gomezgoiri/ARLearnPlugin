@@ -118,11 +118,6 @@ function wespot_arlearn_init() {
 function wespot_arlearn_page_handler($task) {
 	elgg_load_library('elgg:wespot_arlearn');
 
-	// MB: added check for new task responses when page loads
-	// Each time a page is drawn it calls ARLearn to check for new results.
-	$group_guid = elgg_get_page_owner_guid();
-	checkARLearnForTaskChildren($group_guid);
-
 	if (!isset($task[0])) {
 		$task[0] = 'all';
 	}
