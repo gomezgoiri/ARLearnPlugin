@@ -131,6 +131,9 @@ function wespot_arlearn_page_handler($task) {
 
 	$task_type = $task[0];
 	switch ($task_type) {
+		case 'update':
+			include "$base_dir/update.php";
+			break;
 		case 'owner':
 			include "$base_dir/owner.php";
 			break;
