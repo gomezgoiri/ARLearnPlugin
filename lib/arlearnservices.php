@@ -363,6 +363,13 @@ function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
 	debugWespotARLearn("HTTP ".$method."  http://".$url." (body: ".$jsondata.")");
 
 	$curl = curl_init();
+	//For the record, when the webserver is behind a proxy we should use:
+	//curl_setopt($curl, CURLOPT_PROXY, 'http://wwwcache.open.ac.uk:80');
+	//(Problem:
+	//   * This configuration is too specific, other plugins might do http requests too.
+	//   * I have not found a better way to configure the proxy at PHP level.
+	//)
+	//(Therefore, the simplest solution is not to run the server behind a web proxy)
     switch ($method) {
         case "POST":
             curl_setopt($curl, CURLOPT_POST, 1);
