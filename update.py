@@ -3,7 +3,7 @@
 import json
 import urllib2
 from random import random
-from time import sleep
+from time import sleep, gmtime, strftime
 from threading import Thread
 from argparse import ArgumentParser
 
@@ -20,10 +20,11 @@ def get_url(baseurl, guid):
 
 
 def update_games(baseurl):
+	print "UPDATE START:", strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 	if baseurl.endswith("/"):
 		baseurl = baseurl[:-1]  # Always ending without final slash
 
-    # Get the GUIDs of all the arlearngames.
+    	# Get the GUIDs of all the arlearngames.
 	result = urllib2.urlopen("%s/wespot_arlearn/update" % baseurl).read()
 	guids = json.loads(result)
 
@@ -37,9 +38,9 @@ def update_games(baseurl):
 
 	# Waits until all the requests have been made (i.e., all the daemons have finished).
 	for daemon in daemons:
-		d.join()
+		daemon.join()
 
-	print "Updates finished."
+	print "UPDATE END:", strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
 
 def main():
