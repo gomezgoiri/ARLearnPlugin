@@ -24,24 +24,24 @@ function temporary_patch_while_cron_is_configured() {
   }
 }
 
-function checkARLearnForTaskChildren($guid) {
 
+function checkARLearnForTaskChildren($guid) {
   global $LOOP_COUNT;
 
   elgg_load_library('elgg:wespot_arlearnservices');
 
   $game = get_entity($guid);
   if ($game === FALSE ) {
-    // Don't call ARLEarn if there is no game
-    echo 'No game was found in Elgg\'s database.';
+      // Don't call ARLEarn if there is no game
+      echo 'No game was found in Elgg\'s database.';
   } else {
       $group = get_entity($game->owner_guid);
-      $owner_giud = $group->owner_guid;
-      $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_giud, 'elgg_social_login');
-      $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_giud, 'elgg_social_login'));
+      $owner_guid = $group->owner_guid;
+      $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_guid, 'elgg_social_login');
+      $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_guid, 'elgg_social_login'));
       
       if ($ownerprovider=='') {
-        echo "Invalid provider for user with GUID %d " % $owner_giud;
+        debugWespotARLearn("Ignoring invalid provider for game with GUID '".$guid."' (owner has GUID '".$owner_guid."').");
         return;
       }
       
@@ -193,7 +193,6 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
               // Don't save an item with no title.
               if ($title != "") {
-                elgg_set_ignore_access(true);
                 elgg_push_context('backend_access');
                 $result = new ElggObject();
                 $result->subtype = 'arlearntask';
@@ -223,7 +222,6 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
                 // Add to river
                 add_to_river('river/object/arlearntask/create', 'create', $user->guid, $result->guid);
                 elgg_pop_context();
-                elgg_set_ignore_access(false);
               }
             }
           }
