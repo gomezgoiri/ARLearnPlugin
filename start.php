@@ -398,8 +398,8 @@ function wespot_arlearn_write_permission_check($hook, $entity_type, $returnvalue
 		return ($user->guid == $task->owner_guid);
 	} else if ($params['entity']->getSubtype() == 'arlearntask') {
 		return false;
-	}
-	// $returnvalue is always ignored in this plugin... :-S
+	} // else
+	return $returnvalue;
 }
 
 /**
@@ -411,6 +411,10 @@ function wespot_arlearn_write_permission_check($hook, $entity_type, $returnvalue
  * @param unknown_type $params
  */
 function wespot_arlearn_container_permission_check($hook, $entity_type, $returnvalue, $params) {
+	if (elgg_in_context('backend_access')) { // Not sure when this function is called, but just in case.
+		// When doing changes in the background (e.g., updating content from ARLearn server)
+		return true;
+	}
 
 	if (elgg_get_context() == "wespot_arlearn") {
 		if (elgg_get_page_owner_guid()) {
@@ -429,8 +433,9 @@ function wespot_arlearn_container_permission_check($hook, $entity_type, $returnv
 					return true;
 			}
 		}
-	}
+	} // else
 
+	return $returnvalue;
 }
 
 /**
