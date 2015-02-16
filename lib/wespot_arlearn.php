@@ -2,14 +2,6 @@
 
 global $LOOP_COUNT;
 
-/**
- * Call ARLearn to check if there are new task results.
- *
- * At present it gets the full list and filters out the ones it has already.
- * This will be slow if there are many results.
- * I did try and used a stored date, but stuff got missed out.
- * In the future, some combination of the two, to reduce results, would be good.
- */
 
 function checkARLearnForTaskChildren($guid) {
 
@@ -27,16 +19,23 @@ function checkARLearnForTaskChildren($guid) {
       $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_giud, 'elgg_social_login');
       $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_giud, 'elgg_social_login'));
       
-      if ($ownerprovider=='')
+      if ($ownerprovider=='') {
         echo "Invalid provider for user with GUID %d " % $owner_giud;
         return;
+      }
       
       $usertoken = createARLearnUserToken($ownerprovider, $owneroauth);
       if (isset($usertoken) && $usertoken != "") {
         $firstRun = true;
         $fromtime = 0;
         if (isset($game->arlearn_server_time)) {
-          $fromtime = $game->arlearn_server_time;
+          if (is_array ($game->arlearn_server_time)) {
+            debugWespotARLearn('WARNING: Not sure if having several server_times means that the DB has been corrupted (I guess that during tests).');
+            debugWespotARLearn('This should be automatically fixed in this same request.');
+            $fromtime = end($game->arlearn_server_time);
+          } else {
+            $fromtime = $game->arlearn_server_time;
+          }
         }
         wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $fromtime);
         getChildrenFromARLearn($usertoken, $group, $game, $fromtime);
@@ -173,6 +172,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
               // Don't save an item with no title.
               if ($title != "") {
+                elgg_set_ignore_access(true);
                 elgg_push_context('backend_access');
                 $result = new ElggObject();
                 $result->subtype = 'arlearntask';
@@ -202,6 +202,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
                 // Add to river
                 add_to_river('river/object/arlearntask/create', 'create', $user->guid, $result->guid);
                 elgg_pop_context();
+                elgg_set_ignore_access(false);
               }
             }
           }
