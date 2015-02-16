@@ -97,6 +97,7 @@ function wespot_arlearn_init() {
  	elgg_register_plugin_hook_handler("action", "groups/leave", "wespot_arlearn_group_leave_action_hook");
 }
 
+
 /**
  * Dispatcher for wespot_arlearn.
  * URLs take the form of
@@ -117,6 +118,7 @@ function wespot_arlearn_init() {
  */
 function wespot_arlearn_page_handler($task) {
 	elgg_load_library('elgg:wespot_arlearn');
+	//temporary_patch_while_cron_is_configured(); // FIXME
 
 	if (!isset($task[0])) {
 		$task[0] = 'all';

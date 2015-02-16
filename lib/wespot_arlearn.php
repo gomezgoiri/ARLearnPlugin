@@ -3,6 +3,27 @@
 global $LOOP_COUNT;
 
 
+/**
+ * Call ARLearn to check if there are new task results.
+ *
+ * At present it gets the full list and filters out the ones it has already.
+ * This will be slow if there are many results.
+ * I did try and used a stored date, but stuff got missed out.
+ * In the future, some combination of the two, to reduce results, would be good.
+ */
+// This method will only be used while we configure and ensure that cron script behaves as expected.
+function temporary_patch_while_cron_is_configured() {
+  elgg_load_library('elgg:wespot_arlearnservices');
+  
+  $group_guid = elgg_get_page_owner_guid();
+  $gamearray = elgg_get_entities(array('type' => 'object', 'subtype' => 'arlearngame', 'owner_guid' => $group_guid));
+  if ($gamearray === FALSE || count($gamearray) == 0) {
+    debugWespotARLearn('No game was found in Elgg\'s database.');
+  } else {
+    checkARLearnForTaskChildren( $gamearray[0]->guid );
+  }
+}
+
 function checkARLearnForTaskChildren($guid) {
 
   global $LOOP_COUNT;

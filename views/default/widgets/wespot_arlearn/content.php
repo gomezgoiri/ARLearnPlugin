@@ -6,6 +6,8 @@
 // MB: added check for new task responses when widget draws.
 // Each time the widget is drawn it calls ARLearn to check for new results.
 elgg_load_library('elgg:wespot_arlearn');
+//temporary_patch_while_cron_is_configured(); // FIXME
+
 
 $num = (int) $vars['entity']->wespot_arlearn_num;
 
