@@ -126,9 +126,22 @@ function wespot_arlearn_page_handler($task) {
 
 	elgg_push_breadcrumb(elgg_echo('groups'), 'groups/all');
 	$group = elgg_get_page_owner_entity();
-	if (elgg_instanceof($group, 'group'))
-		elgg_push_breadcrumb($group->name, $group->getURL());
-		
+	if (elgg_instanceof($group, 'group')) {
+		$tab_url = '';
+		$phase = $_GET['phase'];
+		if(!$phase) { $phase = get_entity($task[1])->phase; }
+		if($phase) {
+			$profiles = elgg_get_entities(array('types' => 'object', 'subtypes' => 'tabbed_profile', 'container_guid' => $group->guid));
+			foreach ($profiles as $profile) {
+				if($profile->order == $phase) {
+					$tab_url = '/tab/' . $profile->guid;
+					break;
+				}
+			}
+		}
+		elgg_push_breadcrumb($group->name, $group->getURL() . $tab_url);
+	}
+	
 	$base_dir = elgg_get_plugins_path() . 'wespot_arlearn/pages/wespot_arlearn';
 
 	$task_type = $task[0];
