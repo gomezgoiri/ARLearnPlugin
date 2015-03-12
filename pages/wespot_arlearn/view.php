@@ -64,6 +64,11 @@ $content .= elgg_list_entities_from_metadata(array(
 	'metadata_value' => $task_guid,
 	'limit' => 10,
 	'pagination' => true,
+	/*'order_by_metadata' => array('name' => 'elggx_fivestar_average', 'as' => 'integer', 'direction' => 'desc'),
+	'order_by_metadata' =>  array(
+         array( 'name' => 'elggx_fivestar_average', 'direction' => 'DESC', 'as' => 'integer' ), // this should look like your code right now
+         array( 'name' => 'elggx_fivestar_votes', 'direction' => 'DESC', 'as' => 'integer' )
+    )*/
 ));
 
 $body = elgg_view_layout('content', array(
@@ -73,4 +78,5 @@ $body = elgg_view_layout('content', array(
 	'sidebar' => elgg_view('wespot_arlearn/sidebar/navigation'),
 ));
 
+elgg_load_css('custom_layout');
 echo elgg_view_page($title, $body);

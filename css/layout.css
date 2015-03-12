@@ -1,0 +1,28 @@
+
+.elgg-list {
+    padding: 2% 0;
+}
+
+.elgg-list > li {
+    width: 30%;
+    /* Problem: http://stackoverflow.com/questions/11434756/css-float-elements-with-unequal-heights-left-and-up-in-grid */
+    height: 200px;
+    margin-right: 2%;
+    float: left;
+}
+
+.elgg-list video {
+    width: 100%;
+}
+
+.elgg-list audio {
+    width: 100%;
+}
+
+.elgg-list img.small {
+   width: 100%;
+}
+
+.elgg-list img.tiny {
+   width: 80%;
+}

@@ -30,10 +30,8 @@ $metadata = '';
 //$task_icon = elgg_view('wespot_arlearn/icon', array('annotation' => $annotation, 'size' => 'small', 'task_type' => $task->task_type));
 
 $size = 'small';
-$imagewidth = "300";
 if (elgg_in_context('widgets')) {
 	$size = 'tiny';
-	$imagewidth = "200";
 }
 $user = get_entity($task->owner_guid);
 $task_icon = elgg_view_entity_icon($user, $size, $vars);
@@ -104,9 +102,9 @@ if ($title_link === '') {
 	}
 
 	if ($task->task_type == 'picture') {
-		$summary .= '<a target="_blank" href="'.$text.'"><img width="'.$imagewidth.'" border="0" src="'.$text.'" /></a>';
+		$summary .= '<a target="_blank" href="'.$text.'"><img class="'.$size.'" border="0" src="'.$text.'" /></a>';
 	} else if ($task->task_type == 'video') {
-		$summary .= '<video width="320" height="240" controls>';
+		$summary .= '<video controls>';
 		// Omit type (e.g., "video/ogg") because otherwise even if the video is MP4, Safari does not play it (see ticket:969).
 		$summary .= '<source src="'.$text.'">';  
 		$summary .= '<a target="_blank" href="'.$text.'">'.$user->name.elgg_echo("wespot_arlearn:type_1_label").'</a>';

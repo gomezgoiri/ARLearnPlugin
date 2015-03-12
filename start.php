@@ -95,6 +95,9 @@ function wespot_arlearn_init() {
 	// This will happen before action completed
 	elgg_register_plugin_hook_handler("action", "groups/join", "wespot_arlearn_group_join_action_hook");
  	elgg_register_plugin_hook_handler("action", "groups/leave", "wespot_arlearn_group_leave_action_hook");
+
+ 	// To relayout items in collections (see view.php)
+	elgg_register_css('custom_layout', 'mod/wespot_arlearn/css/layout.css');
 }
 
 
