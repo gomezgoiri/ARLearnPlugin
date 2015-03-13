@@ -62,7 +62,7 @@ $content .= elgg_list_entities_from_metadata(array(
 	'subtype' => 'arlearntask',
 	'metadata_name' => 'parent_guid',
 	'metadata_value' => $task_guid,
-	'limit' => 10,
+	'limit' => 9, // Makes more sense now that there are three elements per row.
 	'pagination' => true,
 	/*'order_by_metadata' => array('name' => 'elggx_fivestar_average', 'as' => 'integer', 'direction' => 'desc'),
 	'order_by_metadata' =>  array(
@@ -78,5 +78,22 @@ $body = elgg_view_layout('content', array(
 	'sidebar' => elgg_view('wespot_arlearn/sidebar/navigation'),
 ));
 
+
 elgg_load_css('custom_layout');
+elgg_load_js('google_channel');
+elgg_load_js('notifications');
+
+elgg_load_library('elgg:wespot_msg');
+elgg_load_library('elgg:wespot_arlearnservices');
+elgg_load_library('elgg:wespot_arlearnmsgservices');
+
+
+//$body .= "<script>clientToken=AHRlWrqcO2pV-soMQ_taAYkLehBKQxqbad06_u9ctzxa_zRBhiFyiZE8uUj8dfGmx-c1h-DzHZc-ij310Oe4XGn2pCjur4AD1V1bDv5QebGY1JzXka8FFHo</script>";
+
+$group = elgg_get_page_owner_entity();
+if (elgg_is_logged_in() && can_write_to_container(0, $group->getGUID())) {
+    $channel_token = wespot_msg_get_channel_token(elgg_get_logged_in_user_entity());
+    $body .= "<script>clientToken='$channel_token';</script>";
+}
+
 echo elgg_view_page($title, $body);

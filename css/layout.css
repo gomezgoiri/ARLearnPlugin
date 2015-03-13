@@ -26,3 +26,8 @@
 .elgg-list img.tiny {
    width: 80%;
 }
+
+.elgg-pagination {
+    clear: both;
+    padding-top: 10px;
+}
