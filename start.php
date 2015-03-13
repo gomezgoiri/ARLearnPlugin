@@ -98,6 +98,12 @@ function wespot_arlearn_init() {
 
  	// To relayout items in collections (see view.php)
 	elgg_register_css('custom_layout', 'mod/wespot_arlearn/css/layout.css');
+
+	// Notifications from ARLearn server
+	elgg_register_library('elgg:wespot_msg', elgg_get_plugins_path() . 'wespot_msg/lib/wespot_msg.php');
+    elgg_register_library('elgg:wespot_arlearnmsgservices', elgg_get_plugins_path() . 'wespot_msg/lib/arlearnmsgservices.php');
+ 	elgg_register_js('google_channel', '//talkgadget.google.com/talkgadget/channel.js');
+ 	elgg_register_js('notifications', 'mod/wespot_arlearn/js/notifications.js');
 }
 
 
@@ -151,6 +157,9 @@ function wespot_arlearn_page_handler($task) {
 	switch ($task_type) {
 		case 'update':
 			include "$base_dir/update.php";
+			break;
+		case 'notification':
+			include "$base_dir/channel.php";
 			break;
 		case 'owner':
 			include "$base_dir/owner.php";
