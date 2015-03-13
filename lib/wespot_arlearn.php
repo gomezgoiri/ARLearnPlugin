@@ -25,6 +25,26 @@ function temporary_patch_while_cron_is_configured() {
 }
 
 
+function checkARLearnForRunId($runid) {
+  $gamearray = elgg_get_entities_from_metadata(array(
+                  'type' => 'object',
+                  'subtype' => 'arlearngame',
+                  'metadata_name_value_pairs' => array(
+                      array(
+                        name => 'arlearn_runid',
+                        value => $runid
+                      )
+                   )
+                ));
+  if ($gamearray === FALSE || count($gamearray) == 0) {
+    debugWespotARLearn('No game was found in Elgg\'s database.');
+  } else {
+    checkARLearnForTaskChildren( $gamearray[0]->guid );
+    echo $gamearray[0]->guid;
+  }
+}
+
+
 function checkARLearnForTaskChildren($guid) {
   global $LOOP_COUNT;
 
@@ -193,6 +213,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
 
               // Don't save an item with no title.
               if ($title != "") {
+                //elgg_set_ignore_access(true);
                 elgg_push_context('backend_access');
                 $result = new ElggObject();
                 $result->subtype = 'arlearntask';
@@ -222,6 +243,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
                 // Add to river
                 add_to_river('river/object/arlearntask/create', 'create', $user->guid, $result->guid);
                 elgg_pop_context();
+                //elgg_set_ignore_access(false);
               }
             }
           }
@@ -231,7 +253,7 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
             if ($response->revoked && $existingObject->isEnabled()) {
               // Following this example: http://learn.elgg.org/en/latest/guides/permissions-check.html
               elgg_push_context('backend_access');
-              debugWespotARLearn("Can edit? ".($existingObject->canEdit() ? 'true' : 'false'));
+              //debugWespotARLearn("Can edit? ".($existingObject->canEdit() ? 'true' : 'false'));
               $existingObject->disable();
               $existingObject->save();
               elgg_pop_context();
