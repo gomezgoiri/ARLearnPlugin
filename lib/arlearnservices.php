@@ -338,7 +338,7 @@ function deleteARLearnTask($usertoken, $gameid, $taskid) {
 function getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken="") {
 	global $serviceRootARLearn;
 
-	debugWespotARLearn('resumptiontoken in getARLearnRunResults: '.print_r($resumptiontoken, true));
+	//debugWespotARLearn('resumptiontoken in getARLearnRunResults: '.print_r($resumptiontoken, true));
 
 	$url = $serviceRootARLearn.'rest/response/runId/'.$runid.'?from='.$fromtime;
 	if ($resumptiontoken != "") {
@@ -360,7 +360,7 @@ function getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken=""
 function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
 	global $weSpotElggARLearnKey;
 
-	debugWespotARLearn("HTTP ".$method."  http://".$url." (body: ".$jsondata.")");
+	//debugWespotARLearn("HTTP ".$method."  http://".$url." (body: ".$jsondata.")");
 
 	$curl = curl_init();
 	//For the record, when the webserver is behind a proxy we should use:
@@ -398,7 +398,7 @@ function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
 		$sendkey = $weSpotElggARLearnKey;
 	}
 
-	debugWespotARLearn('sendkey=: '.print_r($sendkey, true));
+	//debugWespotARLearn('sendkey=: '.print_r($sendkey, true));
 
     curl_setopt($curl, CURLOPT_URL, $url);
 	curl_setopt($curl, CURLOPT_POSTFIELDS, $jsondata);

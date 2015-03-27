@@ -13,18 +13,22 @@ global $LOOP_COUNT;
  */
 // This method will only be used while we configure and ensure that cron script behaves as expected.
 function temporary_patch_while_cron_is_configured() {
-  elgg_load_library('elgg:wespot_arlearnservices');
-  
   $group_guid = elgg_get_page_owner_guid();
-  $gamearray = elgg_get_entities(array('type' => 'object', 'subtype' => 'arlearngame', 'owner_guid' => $group_guid));
+  $gamearray = elgg_get_entities(array(
+                  'type' => 'object',
+                  'subtype' => 'arlearngame',
+                  'owner_guid' => $group_guid
+                ));
   if ($gamearray === FALSE || count($gamearray) == 0) {
-    debugWespotARLearn('No game was found in Elgg\'s database.');
+    debugWespotARLearn('No games were found in Elgg\'s database.');
   } else {
-    checkARLearnForTaskChildren( $gamearray[0]->guid );
+    foreach ($gamearray as $game) {
+      checkARLearnForGameEntity($game);
+    }
   }
 }
 
-
+// TODO rename to checkARLearnForGameId after checking external dependencies
 function checkARLearnForRunId($runid) {
   $gamearray = elgg_get_entities_from_metadata(array(
                   'type' => 'object',
@@ -37,62 +41,199 @@ function checkARLearnForRunId($runid) {
                    )
                 ));
   if ($gamearray === FALSE || count($gamearray) == 0) {
-    debugWespotARLearn('No game was found in Elgg\'s database.');
+    debugWespotARLearn('No game was found in Elgg\'s database for arlearn_runid '.$runid.'.');
   } else {
-    checkARLearnForTaskChildren( $gamearray[0]->guid );
+    checkARLearnForGameEntity($gamearray[0]);  // Just one game per RunId expected.
     echo $gamearray[0]->guid;
   }
 }
 
+// TODO rename to checkARLearnForGameGuid after checking external dependencies
+function checkARLearnForTaskChildren($gameGuid) {
+  // Things I have discovered:
+  //  * arleangame->owner_guid points to a inquiry object
+  //  * The response from ARLearn contains 'responses'.
+  //  * In these 'responses' items we have 'generalItemId' and 'responseId'.
+  //  * arlearntask_top object (a collection) has an arlearn_id which can be matched with the 'generalItemId'
+  //  * arlearntask object (an item in the collection) has an arlearn_id which can be matched with the 'responseId'.
+  $game = get_entity($gameGuid);
 
-function checkARLearnForTaskChildren($guid) {
-  global $LOOP_COUNT;
-
-  elgg_load_library('elgg:wespot_arlearnservices');
-
-  $game = get_entity($guid);
-  if ($game === FALSE ) {
-      // Don't call ARLEarn if there is no game
-      echo 'No game was found in Elgg\'s database.';
+  if (!$game) {
+    echo 'No object was found in Elgg\'s database with guid '.$gameGuid.'.';
   } else {
-      $group = get_entity($game->owner_guid);
-      $owner_guid = $group->owner_guid;
-      $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_guid, 'elgg_social_login');
-      $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_guid, 'elgg_social_login'));
-      
-      if ($ownerprovider=='') {
-        debugWespotARLearn("Ignoring invalid provider for game with GUID '".$guid."' (owner has GUID '".$owner_guid."').");
-        return;
-      }
-      
-      $usertoken = createARLearnUserToken($ownerprovider, $owneroauth);
-      if (isset($usertoken) && $usertoken != "") {
-        $firstRun = true;
-        $fromtime = 0;
-        if (isset($game->arlearn_server_time)) {
-          if (is_array ($game->arlearn_server_time)) {
-            debugWespotARLearn('WARNING: Not sure if having several server_times means that the DB has been corrupted (I guess that during tests).');
-            debugWespotARLearn('This should be automatically fixed in this same request.');
-            $fromtime = end($game->arlearn_server_time);
-          } else {
-            $fromtime = $game->arlearn_server_time;
-          }
-        }
-        wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $fromtime);
-        getChildrenFromARLearn($usertoken, $group, $game, $fromtime);
+    if (get_subtype_from_id($game->subtype)=='arlearngame') {
+      checkARLearnForGameEntity($game);
+    } else {
+      echo 'No arlearngame object was found in Elgg\'s database with guid '.$gameGuid.'.';
     }
   }
 }
 
-/**
- * Check if entity exist, no matter if it is enabled or not.
- *    https://community.elgg.org/discussion/view/188888/best-way-to-disable-an-entity-that-you-still-want-to-be-able-to-get
- */
-function getExistingEntities($arlearnid) {
-  debugWespotARLearn("Looking for existing object with arlearnid ".$arlearnid.".");  
+function checkARLearnForGameEntity($game) {
+  elgg_load_library('elgg:wespot_arlearnservices');
 
-  // Check if entity already exists, no matter if it is enabled or not.
-  $access_status = access_get_show_hidden_status();
+  $group = get_entity($game->owner_guid);
+  if ($group) {
+    $owner_guid = $group->owner_guid;
+    $ownerprovider = elgg_get_plugin_user_setting('provider', $owner_guid, 'elgg_social_login');
+    $owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $owner_guid, 'elgg_social_login'));
+    
+    if ($ownerprovider=='') {
+      debugWespotARLearn("Ignoring invalid provider for game with GUID '".$game->guid."' (owner has GUID '".$owner_guid."').");
+      return;
+    }
+    
+    $usertoken = createARLearnUserToken($ownerprovider, $owneroauth);
+    if (isset($usertoken) && $usertoken != "") {
+      $firstRun = true;
+      $fromtime = 0;
+      if (isset($game->arlearn_server_time)) {
+        $fromtime = $game->arlearn_server_time;
+        if (is_array($fromtime)) {
+          debugWespotARLearn('WARNING: Not sure if having '.count($game->arlearn_server_time).' server_times (game guid: '.$game->guid.') means that the DB has been corrupted (testing?).');
+          debugWespotARLearn('This should be automatically fixed in this same request.');
+          $fromtime = end($fromtime);
+        }
+      }
+      wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $fromtime);
+      getChildrenFromARLearn($usertoken, $group, $game, $fromtime);
+    }
+  }/* else {
+    debugWespotARLearn('Game has no owner ('.$game->guid.').');
+  }*/
+}
+
+function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptiontoken="") {
+  /*
+   * This function seems to be recursive so, just in case, we call a function to prevent never ending loops.
+   * There will never be more than 200 new results for one task at a moment with people always updating.
+   */
+  if (hasReachedLimit(10)) {
+    return;
+  }
+
+  //debugWespotARLearn('resumptiontoken in getChildrenFromARLearn: '.print_r($resumptiontoken, true));
+  $runid = $game->arlearn_runid;
+  $results = getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken);
+
+  if (!$results) {  // $results===false
+    debugWespotARLearn('Incorrect HTTP request in getARLearnRunResults:');
+    debugWespotARLearn("    usertoken: ".$usertoken);
+    debugWespotARLearn("    runid: ".$runid);
+    debugWespotARLearn("    fromtime: ".$fromtime);
+  } else {
+    //debugWespotARLearn('CHILDREN RESULTS LIST: '.print_r($results, true));
+    $datareturned = json_decode($results);
+
+    if (isset($datareturned->error)) {
+      debugWespotARLearn('ERROR getting ARLearn run for runID '.$runid.' from time '.$fromtime.'.');
+    } else {
+      $responsesArray = $datareturned->responses;
+      if ($responsesArray && count($responsesArray) > 0) {
+        // Each JSON response from the ARLearn server is composed by different "sub-responses".
+        foreach ($responsesArray as $response) {
+          processSubResult($response, $runid);
+        }
+      }
+
+      // added check to also make sure we don't process the same resumption token twice.
+      $arlearnResumptionToken = $datareturned->resumptionToken;
+      if (isset($arlearnResumptionToken) && $arlearnResumptionToken!="" && $arlearnResumptionToken!=$resumptiontoken) {
+        // Recursive call!
+        getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $arlearnResumptionToken);
+      } else {
+        updateCheckedTime($game, $datareturned->serverTime);
+      }
+    }
+  }
+}
+
+/*
+ * This function ensures that it will only be called $maximumTimes times.
+ * Just in case, to stop never ending loops.
+ * There will never be more than 200 new results for one task at a moment with people always updating.
+ */
+function hasReachedLimit($maximumUpdates) {
+  //global $LOOP_COUNT;
+  if ($LOOP_COUNT > $maximumUpdates) {
+    return true;
+  } else {
+    $LOOP_COUNT = $LOOP_COUNT+1;
+    return false;
+  }
+}
+
+function updateCheckedTime($game, $newServerTime) {
+  // It stores time in game if it is greater than current time.
+  $storedTime = $game->arlearn_server_time;
+  if (is_array($storedTime)) {  // Due to an error? Check 
+    $storedTime = end($storedTime);
+  }
+
+  if ($newServerTime > $storedTime) {
+    $game->arlearn_server_time = $newServerTime;
+    $game->save();
+    // There is no need to know when we have checked for game updates.
+    //debugWespotARLearn('Game (runId: '.$runid.') updates checked at '.print_r($game->arlearn_server_time, true));
+  }
+}
+
+function processSubResult($response, $runid) {
+  $existingObjects = getExistingEntities($response->responseId);
+
+  if (!$existingObjects or count($existingObjects) == 0) {
+    // Save if the object does not already exist in Elgg.
+    $userinfo = $response->userEmail;
+    $userbits = split(":", $userinfo);
+    $userprovidercode = intval($userbits[0]);
+
+    $useroauth = $userbits[1];
+    $providername = getElggProviderName($userprovidercode);
+
+    $userGuid = getUserGuid($providername, $useroauth);
+    if ($userGuid!=null) {
+      $taskid = $response->generalItemId;
+      $taskArray = elgg_get_entities_from_metadata(array(
+        'type' => 'object',
+        'subtype' => 'arlearntask_top',
+        'metadata_name' => 'arlearn_id',
+        'metadata_value' => $taskid,
+      ));
+
+      if ($taskArray) {
+        //debugWespotARLearn('PROCESSING RESULT FOR taskArray =: '.print_r($taskArray, true));
+        if (count($taskArray)==1) {
+          saveTask($taskArray[0], $response, $userGuid, $runid);
+        } else {
+          debugWespotARLearn('More than a collection (arlearntask_top object) was found for arlearn_id '.$taskid.'.');
+        }
+      } else {
+        debugWespotARLearn('Collection (arlearntask_top object) not found for arlearn_id '.$taskid.'.');
+      }
+    }
+  } else {
+    // We only "update" an existing object to mark that it already exist.
+    foreach ($existingObjects as $existingObject) {
+      //debugWespotARLearn("It exists, but we should update object with GUID ".$existingObject->guid);
+      if ($response->revoked && $existingObject->isEnabled()) {
+        // Following this example: http://learn.elgg.org/en/latest/guides/permissions-check.html
+        elgg_push_context('backend_access');
+        //debugWespotARLearn("Can edit? ".($existingObject->canEdit() ? 'true' : 'false'));
+        $existingObject->disable();
+        $existingObject->save();
+        elgg_pop_context();
+        debugWespotARLearn('Element (guid: '.$existingObject->guid.') was disabled (revoked).');
+      }
+    }
+  }
+}
+
+function getExistingEntities($arlearnid) {
+  /**
+  * Checks if an entity exist, no matter if it is enabled or not.
+  *    https://community.elgg.org/discussion/view/188888/best-way-to-disable-an-entity-that-you-still-want-to-be-able-to-get
+  */
+  $previous_status = access_get_show_hidden_status();
   access_show_hidden_entities(true);
 
   $elggresponseArray = elgg_get_entities_from_metadata(array(
@@ -101,10 +242,60 @@ function getExistingEntities($arlearnid) {
     'metadata_name' => 'arlearnid',
     'metadata_value' => $arlearnid,
   ));
-  // restore previous state
-  access_show_hidden_entities($access_status);
+  // Restore previous state.
+  access_show_hidden_entities($previous_status);
 
   return $elggresponseArray;
+}
+
+function saveTask($task, $response, $userGuid, $runid) {
+  $title = extractTitleFromResponse($response);
+
+  // Don't save an item with no title.
+  if ($title=="") {
+    debugWespotARLearn('Item not saved because it has no title.');
+    debugWespotARLearn(''.print_r($response, true));
+    return;
+  }
+
+  elgg_set_ignore_access(true);
+  elgg_push_context('backend_access');
+  $result = new ElggObject();
+  $result->subtype = 'arlearntask';
+  $result->owner_guid = $userGuid;
+  // FIXME What's group_guid?!
+  // $result->container_guid = $group_guid;
+  $result->write_access_id = ACCESS_PRIVATE;
+  if ($response->revoked) $result->disable();
+
+  //MB: GROUP LEVEL ACCESS ONLY - CHANGED TO PUBLIC FOR NOW
+  //$result->access_id=$group->group_acl; //owner group only
+  $result->access_id = ACCESS_PUBLIC;
+  $result->title = $title;
+  $result->parent_guid = $task->guid;
+  $result->task_type = $task->task_type;
+  $result->description = '';
+  $result->arlearnid = $response->responseId;
+  $result->arlearnrunid = $runid;
+  $result->save();
+
+  // Now save description as an annotation
+  $result->Annotate('arlearntask', '', $result->access_id, $result->owner_guid);
+  $result->save();
+
+  $newResult = get_entity($result->guid);
+  debugWespotARLearn('New item saved: \n'.print_r($newResult, true));
+
+  // Add to river
+  add_to_river('river/object/arlearntask/create', 'create', $userGuid, $result->guid);
+  elgg_pop_context();
+  elgg_set_ignore_access(false);
+}
+
+function getUserGuid($providername, $useroauth) {
+  $user = getUser($providername, $useroauth);
+  if ($user==null) return null;
+  return $user->guid;  // else
 }
 
 function getUser($providername, $useroauth) {
@@ -138,150 +329,10 @@ function extractTitleFromResponse($response) {
   $possibleFields = array('imageUrl', 'videoUrl', 'audioUrl', 'text');
   foreach ($possibleFields as $fieldName) {
     if (array_key_exists($fieldName, $allresponsevars)) {
-      debugWespotARLearn('PROCESSING RESULT FOR title =: '.print_r($allresponsevars[$fieldName], true));
       return $allresponsevars[$fieldName];
     }
   }
-  debugWespotARLearn('PROCESSING RESULT FOR allresponsevars =: '.print_r($allresponsevars, true));
   return "";
-}
-
-function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptiontoken="") {
-  global $LOOP_COUNT;
-
-  // Just in case, to stop never ending loops.
- // There will never be more than 200 new results for one task at a moment with people always updating.
-
-  if ($LOOP_COUNT > 10) {
-    return;
-  }
-  $LOOP_COUNT = $LOOP_COUNT+1;
-
-  debugWespotARLearn('resumptiontoken in getChildrenFromARLearn: '.print_r($resumptiontoken, true));
-
-  $runid = $game->arlearn_runid;
-  $results = getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken);
-
-  if ($results != false) {
-    debugWespotARLearn('CHILDREN RESULTS LIST: '.print_r($results, true));
-    $datareturned = json_decode($results);
-
-    if (isset($datareturned->error)) {
-      debugWespotARLearn('ERROR getting ARLearn run for runID '.$runid.' from time '.$fromtime.'.');
-      return;
-    }
-
-    $responsesArray = $datareturned->responses;
-    $arlearnServerTime = $datareturned->serverTime;
-    $arlearnResumptionToken = $datareturned->resumptionToken;
-
-    debugWespotARLearn('arlearnServerTime: '.print_r($arlearnServerTime, true));
-    debugWespotARLearn('arlearnResumptionToken: '.print_r($arlearnResumptionToken, true));
-
-    if ($responsesArray && count($responsesArray) > 0) {
-
-      foreach ($responsesArray as $response) {
-        $taskid = $response->generalItemId;
-        $responseid = $response->responseId;
-
-        $existingObjects = getExistingEntities($responseid);
-
-        // Don't save if we already have it
-        if (!$existingObjects or count($existingObjects) == 0) {
-          debugWespotARLearn("Receiving info... ");
-          $userinfo = $response->userEmail;
-          $userbits = split(":", $userinfo);
-          $userprovidercode = intval($userbits[0]);
-
-          $useroauth = $userbits[1];
-          $providername = getElggProviderName($userprovidercode);
-
-          $user = getUser($providername, $useroauth);
-          if ($user!=null) {
-            $taskArray = elgg_get_entities_from_metadata(array(
-              'type' => 'object',
-              'subtype' => 'arlearntask_top',
-              'metadata_name' => 'arlearn_id',
-              'metadata_value' => $taskid,
-            ));
-
-            debugWespotARLearn('PROCESSING RESULT FOR taskArray =: '.print_r($taskArray, true));
-
-            if ($taskArray && count($taskArray) > 0) {
-              $task = $taskArray[0];
-              $title = extractTitleFromResponse($response);
-
-              // Don't save an item with no title.
-              if ($title != "") {
-                //elgg_set_ignore_access(true);
-                elgg_push_context('backend_access');
-                $result = new ElggObject();
-                $result->subtype = 'arlearntask';
-                $result->owner_guid = $user->guid;
-                $result->container_guid = $group_guid;
-                $result->write_access_id = ACCESS_PRIVATE;
-                if ($response->revoked) $result->disable();
-
-                //MB: GROUP LEVEL ACCESS ONLY - CHANGED TO PUBLIC FOR NOW
-                //$result->access_id=$group->group_acl; //owner group only
-                $result->access_id=ACCESS_PUBLIC;
-                $result->title = $title;
-                $result->parent_guid = $task->guid;
-                $result->task_type = $task->task_type;
-                $result->description = '';
-                $result->arlearnid = $responseid;
-                $result->arlearnrunid = $runid;
-                $result->save();
-
-                // Now save description as an annotation
-                $result->Annotate('arlearntask', '', $result->access_id, $result->owner_guid);
-                $result->save();
-
-                $newResult = get_entity($result->guid);
-                debugWespotARLearn('newResult =: '.print_r($newResult, true));
-
-                // Add to river
-                add_to_river('river/object/arlearntask/create', 'create', $user->guid, $result->guid);
-                elgg_pop_context();
-                //elgg_set_ignore_access(false);
-              }
-            }
-          }
-        } else {
-          foreach ($existingObjects as $existingObject) {
-            debugWespotARLearn("It exists, but we should update object with GUID ".$existingObject->guid);
-            if ($response->revoked && $existingObject->isEnabled()) {
-              // Following this example: http://learn.elgg.org/en/latest/guides/permissions-check.html
-              elgg_push_context('backend_access');
-              //debugWespotARLearn("Can edit? ".($existingObject->canEdit() ? 'true' : 'false'));
-              $existingObject->disable();
-              $existingObject->save();
-              elgg_pop_context();
-              debugWespotARLearn('MODIFIED OBJECT =: '.print_r($existingObject, true));
-            }
-          }
-        }
-      }
-
-      $arlearnServerTime = $datareturned->serverTime;
-      $arlearnResumptionToken = $datareturned->resumptionToken;
-
-      // added check to also make sure we don't process the same resumption token twice.
-      if (isset($arlearnResumptionToken) && $arlearnResumptionToken != "" && ($resumptiontoken != $arlearnResumptionToken)) {
-        getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $arlearnResumptionToken);
-      } else {
-        // store time in game if it is greater than current time.
-        $storedTime = $game->arlearn_server_time;
-        if ($arlearnServerTime > $storedTime) {
-          $game->arlearn_server_time = $arlearnServerTime;
-          $game->save();
-
-          debugWespotARLearn('GAME time updated: '.print_r($game, true));
-          debugWespotARLearn('$game->arlearn_server_time: '.print_r($game->arlearn_server_time, true));
-        }
-      }
-    }
-  }
 }
 
 /**
@@ -290,7 +341,6 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
  * @param ElggObject $task
  * @return array
  */
-
 function wespot_arlearn_prepare_form_vars($task = null, $parent_guid = 0) {
 
   // input names => defaults
