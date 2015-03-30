@@ -86,17 +86,36 @@ function checkARLearnForGameEntity($game) {
     $usertoken = createARLearnUserToken($ownerprovider, $owneroauth);
     if (isset($usertoken) && $usertoken != "") {
       $firstRun = true;
-      $fromtime = 0;
+      $lastUpdate = 0;
       if (isset($game->arlearn_server_time)) {
-        $fromtime = $game->arlearn_server_time;
-        if (is_array($fromtime)) {
+        $lastUpdate = $game->arlearn_server_time;
+        if (is_array($lastUpdate)) {
           debugWespotARLearn('WARNING: Not sure if having '.count($game->arlearn_server_time).' server_times (game guid: '.$game->guid.') means that the DB has been corrupted (testing?).');
           debugWespotARLearn('This should be automatically fixed in this same request.');
-          $fromtime = end($fromtime);
+          $lastUpdate = end($lastUpdate);
         }
       }
-      wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $fromtime);
-      getChildrenFromARLearn($usertoken, $group, $game, $fromtime);
+
+      global $checking;
+      if (!isset($checking)) {
+        $checking = array();
+      }
+
+      if (isset($checking[$game->guid]) && $checking[$game->guid]) {  // If we are already updating it in another request, avoid another one.
+        debugWespotARLearn('An update for game ('.$game->guid.') is already being processed. Ignoring this one.');
+      } else {
+        $checking[$game->guid] = true;  // FIXME race condition.
+        $diff = time() - intval($lastUpdate/1000);  // TODO Requirement: This server should be roughly synchronized with the ARLearn server.
+        // Let's avoid to overflow ARLearn server ensuring a maximum update rate of 20 seconds.
+        if ($diff>20) {
+          wespot_arlearn_sync_game_tasks($usertoken, $group, $game, $lastUpdate);
+          getChildrenFromARLearn($usertoken, $group, $game, $lastUpdate);
+        } else {
+          debugWespotARLearn('Ignoring request: The game was updated too recently.');
+        }
+        // Finished checking it, let's free some memory.
+        unset($checking[$game->guid]);
+      }
     }
   }/* else {
     debugWespotARLearn('Game has no owner ('.$game->guid.').');
