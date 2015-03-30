@@ -21,10 +21,11 @@ def get_url(baseurl, guid, waitFor=0):
 	start = datetime.datetime.now()
 	urllib2.urlopen(url).read()
         diff = datetime.datetime.now() - start
-        print "  (it took %dms approximately)" % round(diff.microseconds / 1000)
+        print "  (it took %d ms approximately)" % round(diff.microseconds / 1000)
 
 
 def update_games(baseurl, sequential):
+	init_time = datetime.datetime.now()
 	print "UPDATE START:", strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 	if baseurl.endswith("/"):
 		baseurl = baseurl[:-1]  # Always ending without final slash
@@ -51,7 +52,8 @@ def update_games(baseurl, sequential):
 	for daemon in daemons:
 		daemon.join()
 
-	print "UPDATE END:", strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+	elapsed = datetime.datetime.now() - init_time
+	print "UPDATE END (elapsed %ss):" % elapsed.seconds, strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 
 
 def set_proxy():
