@@ -1,12 +1,28 @@
 #! /bin/python
 
+import os
 import json
+import inspect
 import urllib2
 import datetime
 from random import random
 from time import sleep, gmtime, strftime
 from threading import Thread
 from argparse import ArgumentParser
+
+
+def is_previous_update_still_running():
+	current_pid = str(os.getpid())
+	current_script = inspect.getfile(inspect.currentframe())
+	ret = os.popen("ps xeo \"%p %a\"", "r")
+	l = ret.readline()
+	while (l):
+		pieces = l.split()
+		if pieces[0]!=current_pid and len(pieces)>2:
+			if pieces[1]=="python" and pieces[2]==current_script:
+				return True
+		l = ret.readline()
+	return False
 
 
 def get_url(baseurl, guid, waitFor=0):
@@ -20,8 +36,8 @@ def get_url(baseurl, guid, waitFor=0):
 	print "Requesting " + url
 	start = datetime.datetime.now()
 	urllib2.urlopen(url).read()
-        diff = datetime.datetime.now() - start
-        print "  (it took %d ms approximately)" % round(diff.microseconds / 1000)
+	diff = datetime.datetime.now() - start
+	print "  (it took %d ms approximately)" % round(diff.microseconds / 1000)
 
 
 def update_games(baseurl, sequential):
@@ -70,7 +86,10 @@ def main():
                                 help="Should the HTTP requests to update runIds be run parallelly or sequentially.")
 	args = parser.parse_args()
 	#set_proxy()
-	update_games(args.url, args.sequential)
+	if is_previous_update_still_running():
+		print "UPDATE CANCELLED (a previous update is still running):", strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+	else:
+		update_games(args.url, args.sequential)
 
 
 if __name__ == '__main__':
