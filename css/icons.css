@@ -1,16 +1,26 @@
-
-img.small {
+.small {
     width: 48px;
 }
 
-img.medium {
+.medium {
     width: 64px;
 }
 
-img.large {
+.large {
     width: 128px;
 }
 
-img.tiny {
+.tiny {
     width: 22px;
+}
+
+
+/* Precedence over the size-related styles from above */
+
+.landscape {
+    width: 100%;
+}
+
+.portrait {
+    height: 100%;
 }
