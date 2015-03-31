@@ -222,7 +222,7 @@ function processSubResult($response, $runid) {
       if ($taskArray) {
         //debugWespotARLearn('PROCESSING RESULT FOR taskArray =: '.print_r($taskArray, true));
         if (count($taskArray)==1) {
-          saveTask($taskArray[0], $response, $userGuid, $runid);
+          saveTask($taskArray[0]->guid, $response, $userGuid, $runid);
         } else {
           debugWespotARLearn('More than a collection (arlearntask_top object) was found for arlearn_id '.$taskid.'.');
         }
@@ -267,7 +267,7 @@ function getExistingEntities($arlearnid) {
   return $elggresponseArray;
 }
 
-function saveTask($task, $response, $userGuid, $runid) {
+function saveTask($collectionGuid, $response, $userGuid, $runid) {
   $titleAndType = extractTitleAndTypeFromResponse($response);
 
   // Don't save an item with no title.
@@ -291,7 +291,7 @@ function saveTask($task, $response, $userGuid, $runid) {
   //$result->access_id=$group->group_acl; //owner group only
   $result->access_id = ACCESS_PUBLIC;
   $result->title = $titleAndType[0];
-  $result->parent_guid = $task->guid;
+  $result->parent_guid = $collectionGuid;
   $result->task_type = $titleAndType[1];
   $result->description = '';
   $result->arlearnid = $response->responseId;
