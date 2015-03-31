@@ -98,6 +98,8 @@ function wespot_arlearn_init() {
 
  	// To relayout items in collections (see view.php)
 	elgg_register_css('custom_layout', 'mod/wespot_arlearn/css/layout.css');
+	// To define's icons size
+	elgg_register_css('icons_size', 'mod/wespot_arlearn/css/icons.css');
 
 	// Notifications from ARLearn server
 	elgg_register_library('elgg:wespot_msg', elgg_get_plugins_path() . 'wespot_msg/lib/wespot_msg.php');
@@ -235,74 +237,24 @@ function wespot_arlearn_revision_url($annotation) {
 function wespot_arlearn_icon_url_override($hook, $type, $returnvalue, $params) {
 
 	$entity = $params['entity'];
-	$size = $params['size'];
+	// Now I ignore the $size here
+	// Instead, always the same image is returned and its size is adjusted using a CSS class.
 	$type = $params['task_type'];
+	$img_path = 'mod/wespot_arlearn/images/';
 	if (elgg_instanceof($entity, 'object', 'arlearntask_top')) {
-		switch ($size) {
-			case 'tiny':
-				if ($type == "picture") {
-					return 'mod/wespot_arlearn/images/type_photo_sm2.png';
-				} else if ($type == "video") {
-					return 'mod/wespot_arlearn/images/type_video_sm2.png';
-				} else if ($type == "audio") {
-					return 'mod/wespot_arlearn/images/type_audio_sm2.png';
-				} else if ($type == "text") {
-					return 'mod/wespot_arlearn/images/type_text_sm2.png';
-				} else if ($type == "numeric") {
-					return 'mod/wespot_arlearn/images/type_numeric_sm2.png';
-				}
-				break;
-			case 'small':
-				if ($type == "picture") {
-					return 'mod/wespot_arlearn/images/type_photo_sm.png';
-				} else if ($type == "video") {
-					return 'mod/wespot_arlearn/images/type_video_sm.png';
-				} else if ($type == "audio") {
-					return 'mod/wespot_arlearn/images/type_audio_sm.png';
-				} else if ($type == "text") {
-					return 'mod/wespot_arlearn/images/type_text_sm.png';
-				} else if ($type == "numeric") {
-					return 'mod/wespot_arlearn/images/type_numeric_sm.png';
-				}
-				break;
-			case 'medium':
-				if ($type == "picture") {
-					return 'mod/wespot_arlearn/images/type_photo.png';
-				} else if ($type == "video") {
-					return 'mod/wespot_arlearn/images/type_video.png';
-				} else if ($type == "audio") {
-					return 'mod/wespot_arlearn/images/type_audio.png';
-				} else if ($type == "text") {
-					return 'mod/wespot_arlearn/images/type_text.png';
-				} else if ($type == "numeric") {
-					return 'mod/wespot_arlearn/images/type_numeric.png';
-				}
-				break;
-			case 'large':
-				if ($type == "picture") {
-					return 'mod/wespot_arlearn/images/type_photo_lrg.png';
-				} else if ($type == "video") {
-					return 'mod/wespot_arlearn/images/type_video_lrg.png';
-				} else if ($type == "audio") {
-					return 'mod/wespot_arlearn/images/type_audio_lrg.png';
-				} else if ($type == "text") {
-					return 'mod/wespot_arlearn/images/type_text_lrg.png';
-				} else if ($type == "numeric") {
-					return 'mod/wespot_arlearn/images/type_numeric_lrg.png';
-				}
-				break;
-		}
+		//if ($type == "collection") // FIXME Always same type expected, check it or not expect it.
+		return $img_path.'collection.png';		
 	} else if (elgg_instanceof($entity, 'object', 'arlearntask')) {
-		if ($type == "picture") {
-			return 'mod/wespot_arlearn/images/type_photo_sm3.png';
-		} else if ($type == "video") {
-			return 'mod/wespot_arlearn/images/type_video_sm3.png';
-		} else if ($type == "audio") {
-			return 'mod/wespot_arlearn/images/type_audio_sm3.png';
-		} else if ($type == "text") {
-			return 'mod/wespot_arlearn/images/type_text_sm3.png';
-		} else if ($type == "numeric") {
-			return 'mod/wespot_arlearn/images/type_numeric_sm3.png';
+		if ($type == 'picture') {
+			return $img_path.'type_photo.png';
+		} else if ($type == 'video') {
+			return $img_path.'type_video.png';
+		} else if ($type == 'audio') {
+			return $img_path.'type_audio.png';
+		} else if ($type == 'text') {
+			return $img_path.'type_text.png';
+		} else if ($type == 'numeric') {
+			return $img_path.'type_numeric.png';
 		}
 	}
 }

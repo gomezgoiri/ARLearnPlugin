@@ -22,7 +22,6 @@ if ($entity!=false) {
 	$type = $entity->getType();
 	$params = array(
 		'entity' => $entity,
-		'size' => $size,
 		'task_type' => $task_type,
 	);
 
