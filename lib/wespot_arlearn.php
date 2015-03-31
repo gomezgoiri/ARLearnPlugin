@@ -268,10 +268,10 @@ function getExistingEntities($arlearnid) {
 }
 
 function saveTask($task, $response, $userGuid, $runid) {
-  $title = extractTitleFromResponse($response);
+  $titleAndType = extractTitleAndTypeFromResponse($response);
 
   // Don't save an item with no title.
-  if ($title=="") {
+  if (!$titleAndType) {
     debugWespotARLearn('Item not saved because it has no title.');
     debugWespotARLearn(''.print_r($response, true));
     return;
@@ -290,9 +290,9 @@ function saveTask($task, $response, $userGuid, $runid) {
   //MB: GROUP LEVEL ACCESS ONLY - CHANGED TO PUBLIC FOR NOW
   //$result->access_id=$group->group_acl; //owner group only
   $result->access_id = ACCESS_PUBLIC;
-  $result->title = $title;
+  $result->title = $titleAndType[0];
   $result->parent_guid = $task->guid;
-  $result->task_type = $task->task_type;
+  $result->task_type = $titleAndType[1];
   $result->description = '';
   $result->arlearnid = $response->responseId;
   $result->arlearnrunid = $runid;
@@ -342,16 +342,18 @@ function getUser($providername, $useroauth) {
   return null;
 }
 
-function extractTitleFromResponse($response) {
+function extractTitleAndTypeFromResponse($response) {
   $decodedResponseValue = json_decode($response->responseValue);
   $allresponsevars = get_object_vars($decodedResponseValue);  
-  $possibleFields = array('imageUrl', 'videoUrl', 'audioUrl', 'text');
-  foreach ($possibleFields as $fieldName) {
+  $possibleFields = array('imageUrl', 'videoUrl', 'audioUrl', 'text', 'value');
+  $types = array('picture', 'video', 'audio', 'text', 'numeric');
+  for ($i = 0; $i < count($possibleFields); $i++) {
+    $fieldName = $possibleFields[$i];
     if (array_key_exists($fieldName, $allresponsevars)) {
-      return $allresponsevars[$fieldName];
+      return array($allresponsevars[$fieldName], $types[$i]);
     }
   }
-  return "";
+  return null;
 }
 
 /**
