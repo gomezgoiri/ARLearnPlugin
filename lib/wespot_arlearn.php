@@ -95,6 +95,8 @@ function checkARLearnForGameEntity($game) {
           $lastUpdate = end($lastUpdate);
         }
       }
+      // FIXME Just needed to update task_type in arlearntask_top and arlearntask. ticket:885
+      $lastUpdate = 0;
 
       global $checking;
       if (!isset($checking)) {
@@ -231,6 +233,15 @@ function processSubResult($response, $runid) {
       }
     }
   } else {
+      // FIXME Just needed to update task_type in arlearntask_top and arlearntask. ticket:885
+      $taskid = $response->generalItemId;
+      $taskArray = elgg_get_entities_from_metadata(array(
+        'type' => 'object',
+        'subtype' => 'arlearntask_top',
+        'metadata_name' => 'arlearn_id',
+        'metadata_value' => $taskid,
+      ));
+
     // We only "update" an existing object to mark that it already exist.
     foreach ($existingObjects as $existingObject) {
       //debugWespotARLearn("It exists, but we should update object with GUID ".$existingObject->guid);
@@ -243,6 +254,27 @@ function processSubResult($response, $runid) {
         elgg_pop_context();
         debugWespotARLearn('Element (guid: '.$existingObject->guid.') was disabled (revoked).');
       }
+
+      // FIXME Just needed to update task_type in arlearntask_top and arlearntask. ticket:885
+      if (property_exists($taskArray[0], "task_type")) {
+         $titleAndType = extractTitleAndTypeFromResponse($response);
+        if ($titleAndType) {
+          elgg_push_context('backend_access');
+          $existingObject->task_type = $titleAndType[1];
+          $existingObject->save();
+          elgg_pop_context();
+          debugWespotARLearn('Updating type (guid: '.$existingObject->guid.').');
+        }
+      }
+    }
+
+    // FIXME Just needed to update task_type in arlearntask_top and arlearntask. ticket:885
+    if (property_exists($taskArray[0], "task_type")) {
+      elgg_push_context('backend_access');      
+      $taskArray[0]->__unset("task_type");
+      $taskArray[0]->save();
+      elgg_pop_context();
+      debugWespotARLearn('Task has no type now.');
     }
   }
 }
