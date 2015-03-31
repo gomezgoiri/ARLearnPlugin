@@ -8,6 +8,8 @@
  * @uses $vars['annotation']
  */
 
+elgg_load_css('icons_size');
+
 $annotation = $vars['annotation'];
 $task_type = $vars['task_type'];
 
@@ -22,6 +24,7 @@ if ($entity!=false) {
 	$type = $entity->getType();
 	$params = array(
 		'entity' => $entity,
+		'size' => $size,
 		'task_type' => $task_type,
 	);
 
@@ -34,7 +37,7 @@ if ($entity!=false) {
 	if ($annotation) {
 ?>
 <a href="<?php echo $annotation->getURL(); ?>">
-	<img src="<?php echo elgg_normalize_url($url); ?>" />
+	<img src="<?php echo elgg_normalize_url($url); ?>" class="<?php echo $vars['size']; ?>" />
 </a>
 <?php
 	}

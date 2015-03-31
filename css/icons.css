@@ -1,0 +1,16 @@
+
+img.small {
+    width: 48px;
+}
+
+img.medium {
+    width: 64px;
+}
+
+img.large {
+    width: 128px;
+}
+
+img.tiny {
+    width: 22px;
+}
