@@ -13,7 +13,6 @@ $(function() {
 
 	$(".elgg-list .elgg-body video").each(function() {
 		$(this).bind("loadedmetadata", function() { //  loadedmetadata loadstart
-			var proportion = this.videoHeight / this.videoWidth
 			var orientation = getOrientation(this.videoWidth, this.videoHeight);
 			/*console.log("Orientation: " + orientation);*/
 			$(this).addClass(orientation);
