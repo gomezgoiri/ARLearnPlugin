@@ -256,26 +256,15 @@ function processSubResult($response, $runid) {
       }
 
       // FIXME Just needed to update task_type in arlearntask_top and arlearntask. ticket:885
-      //if (property_exists($taskArray[0], "task_type")) {
-         $titleAndType = extractTitleAndTypeFromResponse($response);
-        if ($titleAndType) {
-          elgg_push_context('backend_access');
-          $existingObject->task_type = $titleAndType[1];
-          $existingObject->save();
-          elgg_pop_context();
-          debugWespotARLearn('Updating type (guid: '.$existingObject->guid.').');
-        }
-      //}
+      $titleAndType = extractTitleAndTypeFromResponse($response);
+      if ($titleAndType) {
+        elgg_push_context('backend_access');
+        $existingObject->task_type = $titleAndType[1];
+        $existingObject->save();
+        elgg_pop_context();
+        debugWespotARLearn('Updating type (guid: '.$existingObject->guid.').');
+      }
     }
-
-    // FIXME Just needed to update task_type in arlearntask_top and arlearntask. ticket:885
-    //if (property_exists($taskArray[0], "task_type")) {
-      elgg_push_context('backend_access');      
-      $taskArray[0]->__unset("task_type");
-      $taskArray[0]->save();
-      elgg_pop_context();
-      debugWespotARLearn('Task has no type now.');
-    //}
   }
 }
 
