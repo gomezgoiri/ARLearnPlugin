@@ -98,6 +98,7 @@ function wespot_arlearn_init() {
 
  	// To relayout items in collections (see view.php)
 	elgg_register_css('custom_layout', 'mod/wespot_arlearn/css/layout.css');
+	elgg_register_js('image_list', 'mod/wespot_arlearn/js/images.js');
 	// To define's icons size
 	elgg_register_css('icons_size', 'mod/wespot_arlearn/css/icons.css');
 

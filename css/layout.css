@@ -11,25 +11,8 @@
     float: left;
 }
 
-.elgg-list video {
-    width: 100%;
-}
-
 .elgg-list audio {
     width: 100%;
-}
-
-.elgg-list img.small {
-    width: 100%;
-    /* Problem:
-        If the image is in portrait format
-        and we do not specify height,
-        it will overlaps ".elgg-list > li" */
-    height: 90px;
-}
-
-.elgg-list img.tiny {
-   width: 80%;
 }
 
 .elgg-pagination {
