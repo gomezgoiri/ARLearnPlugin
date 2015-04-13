@@ -105,12 +105,14 @@ function checkARLearnForGameEntities($gamearray, $forceUpdate) {
   if (!$gamearray || count($gamearray) == 0) {
     debugWespotARLearn('No games were found in Elgg\'s database.');
   } else {
-    echo '<p>Updated games:<p><ul>';
+    $debugMsg = 'Updated games:';
     foreach ($gamearray as $game) {
       checkARLearnForGameEntity($game, false);
-      echo '<li>'.$game->guid.'</li>';
+      $debugMsg .= ' '$game->guid;
     }
-    echo '</ul>';
+    // This function will only be called manually (not by the update script).
+    // That's why I am not afraid of making logs grow too much with the following info:
+    debugWespotARLearn($debugMsg.'.');
   }
 }
 
