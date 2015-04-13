@@ -81,6 +81,11 @@ $body = elgg_view_layout('content', array(
 
 elgg_load_css('custom_layout');
 elgg_load_js('image_list');
+
+elgg_load_css('fancybox');
+elgg_load_js('fancybox');
+
+
 elgg_load_js('google_channel');
 elgg_load_js('notifications');
 

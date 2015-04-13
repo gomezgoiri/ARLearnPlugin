@@ -101,6 +101,9 @@ function wespot_arlearn_init() {
 	elgg_register_js('image_list', 'mod/wespot_arlearn/js/images.js');
 	// To define's icons size
 	elgg_register_css('icons_size', 'mod/wespot_arlearn/css/icons.css');
+	// Fancybox
+	elgg_register_css('fancybox', 'mod/wespot_arlearn/css/jquery.fancybox.css');
+	elgg_register_js('fancybox', 'mod/wespot_arlearn/js/jquery.fancybox.pack.js');
 
 	// Notifications from ARLearn server
 	elgg_register_library('elgg:wespot_msg', elgg_get_plugins_path() . 'wespot_msg/lib/wespot_msg.php');
