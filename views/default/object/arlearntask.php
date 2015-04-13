@@ -102,7 +102,7 @@ if ($title_link === '') {
 	}
 
 	if ($task->task_type == 'picture') {
-		$summary .= '<a target="_blank" href="'.$text.'"><img class="'.$size.'" border="0" src="'.$text.'" /></a>';
+		$summary .= '<a class="fancybox" target="_blank" href="'.$text.'"><img class="'.$size.'" border="0" src="'.$text.'" /></a>';
 	} else if ($task->task_type == 'video') {
 		$summary .= '<video controls>';
 		// Omit type (e.g., "video/ogg") because otherwise even if the video is MP4, Safari does not play it (see ticket:969).
