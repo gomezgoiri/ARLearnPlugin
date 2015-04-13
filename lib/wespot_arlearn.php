@@ -23,7 +23,7 @@ function temporary_patch_while_cron_is_configured() {
     debugWespotARLearn('No games were found in Elgg\'s database.');
   } else {
     foreach ($gamearray as $game) {
-      checkARLearnForGameEntity($game);
+      checkARLearnForGameEntity($game, false);
     }
   }
 }
