@@ -91,6 +91,7 @@ function checkARLearnForGuid($guid, $forceUpdate=false, $elgg_type) {
       } else if($subtype=='') { // Inquiry!
         $gamearray = elgg_get_entities(array(
           'type' => 'object',
+          'subtype' => 'arlearngame',
           'container_guid' => $obj->guid
         ));
         // Only one expected, but anyway...
