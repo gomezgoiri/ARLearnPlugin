@@ -29,7 +29,7 @@ function temporary_patch_while_cron_is_configured() {
 }
 
 // TODO rename to checkARLearnForGameId after checking external dependencies
-function checkARLearnForRunId($runid) {
+function checkARLearnForRunId($runid, $forceUpdate=false) {
   $gamearray = elgg_get_entities_from_metadata(array(
                   'type' => 'object',
                   'subtype' => 'arlearngame',
@@ -43,13 +43,13 @@ function checkARLearnForRunId($runid) {
   if ($gamearray === FALSE || count($gamearray) == 0) {
     debugWespotARLearn('No game was found in Elgg\'s database for arlearn_runid '.$runid.'.');
   } else {
-    checkARLearnForGameEntity($gamearray[0]);  // Just one game per RunId expected.
+    checkARLearnForGameEntity($gamearray[0], $forceUpdate);  // Just one game per RunId expected.
     echo $gamearray[0]->guid;
   }
 }
 
 // TODO rename to checkARLearnForGameGuid after checking external dependencies
-function checkARLearnForTaskChildren($gameGuid) {
+function checkARLearnForTaskChildren($gameGuid, $forceUpdate=false) {
   // Things I have discovered:
   //  * arleangame->owner_guid points to a inquiry object
   //  * The response from ARLearn contains 'responses'.
@@ -62,14 +62,14 @@ function checkARLearnForTaskChildren($gameGuid) {
     echo 'No object was found in Elgg\'s database with guid '.$gameGuid.'.';
   } else {
     if (get_subtype_from_id($game->subtype)=='arlearngame') {
-      checkARLearnForGameEntity($game);
+      checkARLearnForGameEntity($game, $forceUpdate);
     } else {
       echo 'No arlearngame object was found in Elgg\'s database with guid '.$gameGuid.'.';
     }
   }
 }
 
-function checkARLearnForGameEntity($game) {
+function checkARLearnForGameEntity($game, $forceUpdate) {
   elgg_load_library('elgg:wespot_arlearnservices');
 
   $group = get_entity($game->owner_guid);
@@ -87,7 +87,7 @@ function checkARLearnForGameEntity($game) {
     if (isset($usertoken) && $usertoken != "") {
       $firstRun = true;
       $lastUpdate = 0;
-      if (isset($game->arlearn_server_time)) {
+      if (!$forceUpdate && isset($game->arlearn_server_time)) {
         $lastUpdate = $game->arlearn_server_time;
         if (is_array($lastUpdate)) {
           debugWespotARLearn('WARNING: Not sure if having '.count($game->arlearn_server_time).' server_times (game guid: '.$game->guid.') means that the DB has been corrupted (testing?).');
@@ -101,7 +101,7 @@ function checkARLearnForGameEntity($game) {
         $checking = array();
       }
 
-      if (isset($checking[$game->guid]) && $checking[$game->guid]) {  // If we are already updating it in another request, avoid another one.
+      if (!$forceUpdate && isset($checking[$game->guid]) && $checking[$game->guid]) {  // If we are already updating it in another request, avoid another one.
         debugWespotARLearn('An update for game ('.$game->guid.') is already being processed. Ignoring this one.');
       } else {
         $checking[$game->guid] = true;  // FIXME race condition.

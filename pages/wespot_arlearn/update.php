@@ -1,14 +1,12 @@
 <?php
 
 
+$force = isset($_GET['force']);
+
 if (isset($_GET['guid'])) {
-
-	checkARLearnForTaskChildren($_GET['guid']);
-
+	checkARLearnForTaskChildren($_GET['guid'], $force);
 } else if (isset($_GET['runid'])) {
-
-	checkARLearnForRunId($_GET['runid']);
-
+	checkARLearnForRunId($_GET['runid'], $force);
 } else {
 	$gamearray = elgg_get_entities(array('type' => 'object', 'subtype' => 'arlearngame', 'limit'=> 0));
 
