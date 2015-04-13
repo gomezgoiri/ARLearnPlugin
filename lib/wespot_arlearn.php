@@ -108,7 +108,7 @@ function checkARLearnForGameEntities($gamearray, $forceUpdate) {
     $debugMsg = 'Updated games:';
     foreach ($gamearray as $game) {
       checkARLearnForGameEntity($game, false);
-      $debugMsg .= ' '$game->guid;
+      $debugMsg .= ' '.$game->guid;
     }
     // This function will only be called manually (not by the update script).
     // That's why I am not afraid of making logs grow too much with the following info:
