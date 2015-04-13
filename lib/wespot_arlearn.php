@@ -19,16 +19,9 @@ function temporary_patch_while_cron_is_configured() {
                   'subtype' => 'arlearngame',
                   'owner_guid' => $group_guid
                 ));
-  if ($gamearray === FALSE || count($gamearray) == 0) {
-    debugWespotARLearn('No games were found in Elgg\'s database.');
-  } else {
-    foreach ($gamearray as $game) {
-      checkARLearnForGameEntity($game, false);
-    }
-  }
+  checkARLearnForGameEntities($gamearray, false);
 }
 
-// TODO rename to checkARLearnForGameId after checking external dependencies
 function checkARLearnForRunId($runid, $forceUpdate=false) {
   $gamearray = elgg_get_entities_from_metadata(array(
                   'type' => 'object',
@@ -40,32 +33,83 @@ function checkARLearnForRunId($runid, $forceUpdate=false) {
                       )
                    )
                 ));
-  if ($gamearray === FALSE || count($gamearray) == 0) {
-    debugWespotARLearn('No game was found in Elgg\'s database for arlearn_runid '.$runid.'.');
+  checkARLearnForGameEntities($gamearray, $forceUpdate);  // Just one game per RunId expected, but still...
+}
+
+function checkARLearnForInquiry($guid, $forceUpdate=false) {
+  checkARLearnForGuid($guid, $forceUpdate, '');
+}
+
+function checkARLearnForCollection($guid, $forceUpdate=false) {
+  checkARLearnForGuid($guid, $forceUpdate, 'arlearntask_top');
+}
+
+function checkARLearnForGame($guid, $forceUpdate=false) {
+  checkARLearnForGuid($guid, $forceUpdate, 'arlearngame');
+}
+
+// In ARLearn they have (====: equivalent, ===? : Not sure):
+//  * games ===? inquiries
+//  * runs ===? collections
+//  * arlearntask_top === collection
+//  * arlearntask === item (picture, text, etc.)
+//
+// Things I have discovered:
+//  * The RunId response from ARLearn contains 'responses'.
+//    * In these 'responses' items we have 'generalItemId' and 'responseId'.
+//  * arleangame->owner_guid points to a inquiry object
+//  * arlearntask_top object (a collection) has:
+//    * an arlearn_id which can be matched with the 'generalItemId'
+//    * an arlearn_gameid which can be matched with
+//  * arlearntask object (an item in the collection) has:
+//     * an arlearn_id which can be matched with the 'responseId'.
+//     * an runid which can be matched with the runId
+//     * parent_guid which points to arlearntask_top
+// 
+// Things I don't understand (or if I do, they are potential FIXMEs):
+//  * runid should be defined in arlearntask_top and not in arlearntask (to avoid unnecesary repetitions)
+function checkARLearnForGuid($guid, $forceUpdate=false, $elgg_type) {
+  $obj = get_entity($guid);
+
+  if (!$obj) {
+    echo 'No object was found in Elgg\'s database with guid '.$guid.'.';
   } else {
-    checkARLearnForGameEntity($gamearray[0], $forceUpdate);  // Just one game per RunId expected.
-    echo $gamearray[0]->guid;
+    $subtype = get_subtype_from_id($obj->subtype);
+    if ($subtype!=$elgg_type) { // Check to avoid confussions...
+      echo 'Sorry, the object with guid '.$guid.' was expected to be a "'.$elgg_type.'".';
+    } else {
+      if ($subtype=='arlearngame') {
+        checkARLearnForGameEntity($obj, $forceUpdate);
+      } else if($subtype=='arlearntask_top') {
+        $gamearray = elgg_get_entities(array(
+          'type' => 'object',
+          'subtype' => 'arlearngame',
+          'container_guid' => $obj->container_guid
+        ));
+        // In my dev-site I have seen a 1-1 correspondence between game and collection (through their container inquiry)...
+        checkARLearnForGameEntities($gamearray, $forceUpdate);
+      } else if($subtype=='') { // Inquiry!
+        $gamearray = elgg_get_entities(array(
+          'type' => 'object',
+          'container_guid' => $obj->guid
+        ));
+        // Only one expected, but anyway...
+        checkARLearnForGameEntities($gamearray, $forceUpdate);
+      }
+    }
   }
 }
 
-// TODO rename to checkARLearnForGameGuid after checking external dependencies
-function checkARLearnForTaskChildren($gameGuid, $forceUpdate=false) {
-  // Things I have discovered:
-  //  * arleangame->owner_guid points to a inquiry object
-  //  * The response from ARLearn contains 'responses'.
-  //  * In these 'responses' items we have 'generalItemId' and 'responseId'.
-  //  * arlearntask_top object (a collection) has an arlearn_id which can be matched with the 'generalItemId'
-  //  * arlearntask object (an item in the collection) has an arlearn_id which can be matched with the 'responseId'.
-  $game = get_entity($gameGuid);
-
-  if (!$game) {
-    echo 'No object was found in Elgg\'s database with guid '.$gameGuid.'.';
+function checkARLearnForGameEntities($gamearray, $forceUpdate) {
+  if (!$gamearray || count($gamearray) == 0) {
+    debugWespotARLearn('No games were found in Elgg\'s database.');
   } else {
-    if (get_subtype_from_id($game->subtype)=='arlearngame') {
-      checkARLearnForGameEntity($game, $forceUpdate);
-    } else {
-      echo 'No arlearngame object was found in Elgg\'s database with guid '.$gameGuid.'.';
+    echo '<p>Updated games:<p><ul>';
+    foreach ($gamearray as $game) {
+      checkARLearnForGameEntity($game, false);
+      echo '<li>'.$game->guid.'</li>';
     }
+    echo '</ul>';
   }
 }
 
