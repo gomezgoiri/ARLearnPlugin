@@ -104,11 +104,13 @@ if ($title_link === '') {
 	if ($task->task_type == 'picture') {
 		$summary .= '<a class="fancybox" target="_blank" href="'.$text.'"><img class="'.$size.'" border="0" src="'.$text.'" /></a>';
 	} else if ($task->task_type == 'video') {
-		$summary .= '<video controls>';
+		$videoSnippet = '<video controls>';
 		// Omit type (e.g., "video/ogg") because otherwise even if the video is MP4, Safari does not play it (see ticket:969).
-		$summary .= '<source src="'.$text.'">';  
-		$summary .= '<a target="_blank" href="'.$text.'">'.$user->name.elgg_echo("wespot_arlearn:type_1_label").'</a>';
-		$summary .= '</video>';
+		$videoSnippet .= '<source src="'.$text.'" />';
+		$videoSnippet .= '<p>'.$user->name.elgg_echo("wespot_arlearn:type_1_label").'</p>';
+		$videoSnippet .= '</video>';
+		$summary .= '<a class="fancybox" href="#video'.$task->guid.'">'.$videoSnippet.'</a>';
+		$summary .= '<div style="display:none"><div id="video'.$task->guid.'">'.$videoSnippet.'</div></div>';
 	} else if ($task->task_type == 'audio') {
 		$summary .= '<audio controls>';
 		$summary .= '<source src="'.$text.'">';
