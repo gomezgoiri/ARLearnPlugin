@@ -22,7 +22,8 @@
 }
 
 .portrait {
-    height: 100%;
+    height: 120px;
+    width: auto;
 }
 
 video.portrait {
