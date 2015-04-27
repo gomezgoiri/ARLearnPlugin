@@ -6,9 +6,13 @@ function getOrientation(width, height) {
 
 
 $(function() {
-	$(".elgg-list .elgg-body img").load(function() {
+	$(".elgg-list .elgg-body img").one("load", function() {
 		var orientation = getOrientation($(this).width(), $(this).height());
 		$(this).addClass(orientation);
+	}).each(function() {
+		// To force setting the orientation even when the image is cached.
+		// (see http://stackoverflow.com/questions/3877027/jquery-callback-on-image-load-even-when-the-image-is-cached)
+		if(this.complete) $(this).load();
 	});
 
 	$(".elgg-list .elgg-body video").each(function() {
