@@ -11,15 +11,17 @@ from threading import Thread
 from argparse import ArgumentParser
 
 
-def is_previous_update_still_running():
+def is_previous_update_still_running(url):
 	current_pid = str(os.getpid())
 	current_script = inspect.getfile(inspect.currentframe())
 	ret = os.popen("ps xeo \"%p %a\"", "r")
 	l = ret.readline()
 	while (l):
 		pieces = l.split()
-		if pieces[0]!=current_pid and len(pieces)>2:
-			if pieces[1]=="python" and pieces[2]==current_script:
+		if pieces[0]!=current_pid and len(pieces)>4:
+			if pieces[1]=="python" and pieces[2]==current_script and \
+				# Other server's info might be updated from this server...
+				pieces[3]=="-u" and pieces[4]==url:
 				return True
 		l = ret.readline()
 	return False
@@ -86,7 +88,7 @@ def main():
                                 help="Should the HTTP requests to update runIds be run parallelly or sequentially.")
 	args = parser.parse_args()
 	#set_proxy()
-	if is_previous_update_still_running():
+	if is_previous_update_still_running(args.url):
 		print "UPDATE CANCELLED (a previous update is still running):", strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
 	else:
 		update_games(args.url, args.sequential)
