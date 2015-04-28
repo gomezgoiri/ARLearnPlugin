@@ -37,15 +37,15 @@ function checkARLearnForRunId($runid, $forceUpdate=false) {
 }
 
 function checkARLearnForInquiry($guid, $forceUpdate=false) {
-  checkARLearnForGuid($guid, $forceUpdate, '');
+  checkARLearnForGuid($guid, '', $forceUpdate);
 }
 
 function checkARLearnForCollection($guid, $forceUpdate=false) {
-  checkARLearnForGuid($guid, $forceUpdate, 'arlearntask_top');
+  checkARLearnForGuid($guid, 'arlearntask_top', $forceUpdate);
 }
 
 function checkARLearnForGame($guid, $forceUpdate=false) {
-  checkARLearnForGuid($guid, $forceUpdate, 'arlearngame');
+  checkARLearnForGuid($guid, 'arlearngame', $forceUpdate);
 }
 
 // In ARLearn they have (====: equivalent, ===? : Not sure):
@@ -68,7 +68,7 @@ function checkARLearnForGame($guid, $forceUpdate=false) {
 // 
 // Things I don't understand (or if I do, they are potential FIXMEs):
 //  * runid should be defined in arlearntask_top and not in arlearntask (to avoid unnecesary repetitions)
-function checkARLearnForGuid($guid, $forceUpdate=false, $elgg_type) {
+function checkARLearnForGuid($guid, $elgg_type, $forceUpdate) {
   $obj = get_entity($guid);
 
   if (!$obj) {
@@ -107,8 +107,8 @@ function checkARLearnForGameEntities($gamearray, $forceUpdate) {
   } else {
     $debugMsg = 'Updated games:';
     foreach ($gamearray as $game) {
-      checkARLearnForGameEntity($game, false);
-      $debugMsg .= ' '.$game->guid;
+      checkARLearnForGameEntity($game, $forceUpdate);
+      $debugMsg .= ' '.$game->guid.' ('.$game->arlearn_runid.')';
     }
     // This function will only be called manually (not by the update script).
     // That's why I am not afraid of making logs grow too much with the following info:
