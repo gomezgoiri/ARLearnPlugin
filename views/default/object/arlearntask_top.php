@@ -39,42 +39,37 @@ if (elgg_in_context('widgets')) {
 $task_icon = elgg_view('wespot_arlearn/icon', array('annotation' => $annotation, 'size' => $size, 'task_type' => 'collection'));
 
 
-if (!elgg_in_context('widgets')) {
+$owner = $vars['entity']->getOwnerEntity();
+$ownertxt = elgg_echo('unknown');
+if ($owner)
+	$ownertxt = "<a href=\"" . $owner->getURL() . "\">" . $owner->name ."</a>";
+$date = elgg_view_friendly_time($vars['entity']->time_created);
+$editor_text = elgg_echo('entity:default:strapline', array($date, $ownertxt));
 
-	$editor = get_entity($annotation->owner_guid);
-	$editor_link = elgg_view('output/url', array(
-		'href' => "profile/$editor->username",
-		'text' => $editor->name,
+$tags = elgg_view('output/tags', array('tags' => $task->tags));
+$categories = elgg_view('output/categories', $vars);
+
+$comments_count = $task->countComments();
+//only display if there are commments
+if ($comments_count != 0 && !$revision) {
+	$text = elgg_echo("comments") . " ($comments_count)";
+	$comments_link = elgg_view('output/url', array(
+		'href' => $task->getURL() . '#task-comments',
+		'text' => $text,
 		'is_trusted' => true,
 	));
-
-	$date = elgg_view_friendly_time($annotation->time_created);
-	$editor_text = elgg_echo('wespot_arlearn:strapline', array($date, $editor_link));
-	$tags = elgg_view('output/tags', array('tags' => $task->tags));
-	$categories = elgg_view('output/categories', $vars);
-
-	$comments_count = $task->countComments();
-	//only display if there are commments
-	if ($comments_count != 0 && !$revision) {
-		$text = elgg_echo("comments") . " ($comments_count)";
-		$comments_link = elgg_view('output/url', array(
-			'href' => $task->getURL() . '#task-comments',
-			'text' => $text,
-			'is_trusted' => true,
-		));
-	} else {
-		$comments_link = '';
-	}
-
-	$metadata = elgg_view_menu('entity', array(
-		'entity' => $vars['entity'],
-		'handler' => 'wespot_arlearn',
-		'sort_by' => 'priority',
-		'class' => 'elgg-menu-hz',
-	));
-
-	$subtitle = "$editor_text $comments_link $categories";
+} else {
+	$comments_link = '';
 }
+
+$metadata = elgg_view_menu('entity', array(
+	'entity' => $vars['entity'],
+	'handler' => 'wespot_arlearn',
+	'sort_by' => 'priority',
+	'class' => 'elgg-menu-hz',
+));
+
+$subtitle = "$editor_text $comments_link $categories";
 
 // do not show the metadata and controls in widget view
 if ($revision) {
