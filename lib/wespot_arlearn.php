@@ -118,6 +118,10 @@ function checkARLearnForGameEntities($gamearray, $forceUpdate) {
 
 function checkARLearnForGameEntity($game, $forceUpdate) {
   elgg_load_library('elgg:wespot_arlearnservices');
+  if($forceUpdate) {
+    global $debug_wespot_arlearn;
+    $debug_wespot_arlearn = true;
+  }
 
   $group = get_entity($game->owner_guid);
   if ($group) {
@@ -178,7 +182,6 @@ function getChildrenFromARLearn($usertoken, $group, $game, $fromtime, $resumptio
     return;
   }
 
-  //debugWespotARLearn('resumptiontoken in getChildrenFromARLearn: '.print_r($resumptiontoken, true));
   $runid = $game->arlearn_runid;
   $results = getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken);
 
