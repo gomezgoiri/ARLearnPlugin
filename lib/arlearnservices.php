@@ -313,13 +313,13 @@ function editARLearnTask($usertoken, $gameid, $title, $description, $tasktype, $
 }
 
 /**
- * Delete the data collection task with the given id number from the game with the given gameid on behlaf of the user with the given usertoekn.
+ * Delete the data collection task with the given id number from the game with the given gameid on behalf of the user with the given usertoken.
  * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
  * @param $gameid the ARLearn Game id to remove the task from.
  * @param $taskid the ARLearn GeneralItem id of the task to delete.
  * @return false, if the attempt failed, else the response data from the ARLearn service call (will be a json string).
  */
-function deleteARLearnTask($usertoken, $gameid, $taskid) {
+function deleteARLearnTaskTop($usertoken, $gameid, $taskid) {
 	global $serviceRootARLearn;
 
 	$url = $serviceRootARLearn.'rest/generalItems/gameId/'.$gameid.'/generalItem/'.$taskid;
