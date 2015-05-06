@@ -372,12 +372,11 @@ function wespot_arlearn_write_permission_check($hook, $entity_type, $returnvalue
 		return true;
 	}
 
-	if ($params['entity']->getSubtype() == 'arlearntask_top') {
+	$subtype = $params['entity']->getSubtype();
+	if ($subtype=='arlearntask_top' || $subtype=='arlearntask') {
 		$task = $params['entity'];
 		$user = $params['user'];
 		return ($user->guid == $task->owner_guid);
-	} else if ($params['entity']->getSubtype() == 'arlearntask') {
-		return false;
 	} // else
 	return $returnvalue;
 }
