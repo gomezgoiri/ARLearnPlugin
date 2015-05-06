@@ -328,6 +328,20 @@ function deleteARLearnTaskTop($usertoken, $gameid, $taskid) {
 }
 
 /**
+ * Delete an item from a data collection task with the given id responseId.
+ * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
+ * @param $responseId the item in a game.
+ * @return false, if the attempt failed, else the response data from the ARLearn service call (will be a json string).
+ */
+function deleteARLearnTask($usertoken, $responseId) {
+	global $serviceRootARLearn;
+
+	$url = $serviceRootARLearn.'rest/response/responseId/'.$responseId;
+	$results = callARLearnAPI("DELETE", $url, "", $usertoken);
+	return $results;
+}
+
+/**
  * Get the Run results for the given runid from the given time stamp.
  * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
  * @param $runid the ARLearn Run id to get data from.
