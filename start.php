@@ -250,7 +250,16 @@ function wespot_arlearn_icon_url_override($hook, $type, $returnvalue, $params) {
 	$type = $params['task_type'];
 	$img_path = 'mod/wespot_arlearn/images/';
 	if (elgg_instanceof($entity, 'object', 'arlearntask_top')) {
-		//if ($type == "collection") // FIXME Always same type expected, check it or not expect it.
+		$icons = array(
+			'picture'=>'collection_pictures.png',
+			'video'=>'collection_videos.png',
+			'audio'=>'collection_audios.png',
+			'text'=>'collection_texts.png',
+			'numeric'=>'collection_numbers.png'
+		);
+		if (array_key_exists($type, $icons)) {
+			return $img_path.$icons[$type];
+		}
 		return $img_path.'collection.png';		
 	} else if (elgg_instanceof($entity, 'object', 'arlearntask')) {
 		if ($type == 'picture') {
