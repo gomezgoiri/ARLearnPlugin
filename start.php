@@ -180,6 +180,10 @@ function wespot_arlearn_page_handler($task) {
 			set_input('guid', $task[1]);
 			include "$base_dir/new.php";
 			break;
+		case 'add-item':
+			set_input('guid', $task[1]);
+			include "$base_dir/new-item.php";
+			break;
 		case 'edit':
 			set_input('guid', $task[1]);
 			include "$base_dir/edit.php";
@@ -329,7 +333,16 @@ function wespot_arlearn_entity_menu_setup($hook, $type, $return, $params) {
                 'priority' => 250,
                 'title' => elgg_echo('wespot_arlearn:export:rebuild')
         );
-        $return[] = ElggMenuItem::factory($options);        
+        $return[] = ElggMenuItem::factory($options);
+
+        $options = array(
+                'name' => 'add_item',
+                'text' => "<span class=\"elgg-icon elgg-icon-add\"></span>",
+                'href' => "wespot_arlearn/add-item/$entity->guid",
+                'priority' => 250,
+                'title' => elgg_echo('wespot_arlearn:add:item')
+        );
+        $return[] = ElggMenuItem::factory($options);
     }
     
 	return $return;

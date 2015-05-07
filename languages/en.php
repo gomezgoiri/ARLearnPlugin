@@ -16,6 +16,7 @@ $english = array(
 	'wespot_arlearn:friends' => "Friends' data collection tasks",
 	'wespot_arlearn:all' => "All site data collection tasks",
 	'wespot_arlearn:add' => "Add data collection task",
+	'wespot_arlearn:add_item' => "Add item to the collection task",
 
 	/**
 	 * Using 'group' does not work - has old cached version with task at end
