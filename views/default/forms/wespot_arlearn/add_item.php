@@ -5,8 +5,6 @@
 
 
 $container = get_entity($vars['parent_guid']);
-echo print_r($container->task_type, true);
-
 
 $cats = elgg_view('input/categories', $vars);
 if (!empty($cats)) {
@@ -14,8 +12,18 @@ if (!empty($cats)) {
 }
 
 
+function getAcceptedTypes($task_type) {
+	// See: http://www.w3schools.com/tags/att_input_accept.asp
+	if($task_type=='picture') return 'image/*';
+	if($task_type=='video') return 'video/*';
+	if($task_type=='audio') return 'audio/*';
+	return '*'; // Unexpected, better to throw an error
+}
+
+
 echo elgg_view('input/file', array(
-	'name' => 'file_to_upload'
+	'name' => 'file_to_upload',
+	'accept' => getAcceptedTypes($container->task_type)
 ));
 
 

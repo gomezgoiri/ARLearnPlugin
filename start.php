@@ -27,10 +27,11 @@ function wespot_arlearn_init() {
 	elgg_register_entity_url_handler('object', 'arlearntask', 'wespot_arlearn_url');
 	elgg_register_annotation_url_handler('arlearntask', 'wespot_arlearn_revision_url');
 
-	// Register some actions
+	// Register some actions (action = what's called by a form)
 	$action_base = elgg_get_plugins_path() . 'wespot_arlearn/actions/wespot_arlearn';
-	elgg_register_action("wespot_arlearn/edit", "$action_base/edit.php");
-	elgg_register_action("wespot_arlearn/delete", "$action_base/delete.php");
+	elgg_register_action('wespot_arlearn/edit', "$action_base/edit.php");
+	elgg_register_action('wespot_arlearn/delete', "$action_base/delete.php");
+	elgg_register_action('wespot_arlearn/upload', "$action_base/upload.php");
 
 	// Extend the main css view
 	elgg_extend_view('css/elgg', 'wespot_arlearn/css');

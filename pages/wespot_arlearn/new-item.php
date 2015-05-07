@@ -27,7 +27,8 @@ elgg_push_breadcrumb($title);
 
 $vars = wespot_arlearn_prepare_form_vars(null, $parent_guid);
 $content = elgg_view_form('wespot_arlearn/add_item', array(
-		'enctype' => 'multipart/form-data'
+		'enctype' => 'multipart/form-data',
+		'action' => 'action/wespot_arlearn/upload'
 	), $vars);
 
 $body = elgg_view_layout('content', array(
