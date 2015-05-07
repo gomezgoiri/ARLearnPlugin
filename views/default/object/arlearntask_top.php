@@ -35,7 +35,6 @@ if (elgg_in_context('widgets')) {
 	$size = 'tiny';
 }
 
-// 'task_type' is not needed for 'arlearn_top' type of objects, but I pass it to be uniform and enhance readability.
 $task_icon = elgg_view('wespot_arlearn/icon', array('annotation' => $annotation, 'size' => $size, 'task_type' => $task->task_type));
 
 
