@@ -20,9 +20,8 @@ function extensionBelongsToType($collection_type, $filetype) {
 }
 
 
-
+$collectionType = $collection->task_type;
 if (isset($_FILES['file_to_upload'])) {
-	$collectionType = $collection->task_type;
 
 	# Check that the file_to_upload field has only be defined for items that are associated with files (e.g., no textual or numeric items).
 	$uploadTypes = array('picture', 'video', 'audio');
@@ -40,6 +39,19 @@ if (isset($_FILES['file_to_upload'])) {
 	}
 
 	//system_message(print_r($_FILES['file_to_upload'], true));
+	/*
+  	[name] => MyFile.txt (comes from the browser, so treat as tainted)
+    [type] => text/plain  (not sure where it gets this from - assume the browser, so treat as tainted)
+    [tmp_name] => /tmp/php/php1h4j1o (could be anywhere on your system, depending on your config settings, but the user has no control, so this isn't tainted)
+    [error] => UPLOAD_ERR_OK  (= 0)
+    [size] => 123   (the size in bytes)
+	*/
+} else if (isset($_POST[$collectionType])) { // numeric and text
+	$value = $_POST[$collectionType];
+	system_message($value);
+} else {
+	register_error("The collection only has items of type $collectionType.");
+	forward(REFERER);
 }
 ?>
 

@@ -61,6 +61,7 @@ $english = array(
 	'wespot_arlearn:tags' => 'Tags',
 	'wespot_arlearn:access_id' => 'Read access',
 	'wespot_arlearn:write_access_id' => 'Write access',
+	'wespot_arlearn:item_value' => 'Item value',
 
 	/**
 	 * Status and error messages

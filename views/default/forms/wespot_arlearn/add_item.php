@@ -20,19 +20,34 @@ function getAcceptedTypes($task_type) {
 	return '*'; // Unexpected, better to throw an error
 }
 
+ ?>
 
-echo elgg_view('input/file', array(
-	'name' => 'file_to_upload',
-	'accept' => getAcceptedTypes($container->task_type)
-));
+<div>
+	<label><?php echo elgg_echo('wespot_arlearn:item_value'); ?></label>
+	<?php
 
+		$cType = $container->task_type;
+		if ($cType=='picture' || $cType=='video' || $cType=='audio') {
+			echo elgg_view('input/file', array(
+				'name' => 'file_to_upload',
+				'accept' => getAcceptedTypes($cType)
+			));
+		} else if ($cType=='numeric' || $cType=='text') {
+			$inputType = ($cType=='numeric')? 'input/number': 'input/text';
+			echo elgg_view($inputType, array(
+				'name' => $cType
+			));
+		}
+	?>
+</div>
 
-echo '<div class="elgg-foot">';
-echo elgg_view('input/hidden', array(
-	'name' => 'collection_guid',
-	'value' => $vars['guid'],
-));
+<div class="elgg-foot">
+<?php
+	echo elgg_view('input/hidden', array(
+		'name' => 'collection_guid',
+		'value' => $vars['guid'],
+	));
 
-echo elgg_view('input/submit', array('value' => elgg_echo('save')));
-
-echo '</div>';
+	echo elgg_view('input/submit', array('value' => elgg_echo('save')));
+?>
+</div>
