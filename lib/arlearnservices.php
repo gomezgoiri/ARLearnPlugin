@@ -7,7 +7,7 @@
 
 /** Turn debugging message on and off */
 global $debug_wespot_arlearn;
-$debug_wespot_arlearn = false;
+$debug_wespot_arlearn = true;
 
 /** The url for the ARLearn service calls */
 global $serviceRootARLearn;
@@ -335,10 +335,25 @@ function deleteARLearnTaskTop($usertoken, $gameid, $taskid) {
  */
 function deleteARLearnTask($usertoken, $responseId) {
 	global $serviceRootARLearn;
-
 	$url = $serviceRootARLearn.'rest/response/responseId/'.$responseId;
 	$results = callARLearnAPI('DELETE', $url, "", $usertoken);
 	return $results;
+}
+
+/**
+ * Asks for an URL to upload a file.
+ * @param $userToken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
+ * @param $runId
+ * @param $fileName name of the file to be uploaded
+ * @return the URL where the file should be uploaded in a subsequent step.
+ */
+function createFileUploadURL($userToken, $runId, $fileName) {
+	global $serviceRootARLearn;
+	//$url = $serviceRootARLearn.'uploadServiceWithUrl?runId='.$runId.'&account='.substr($userToken, 1).'&fileName='.$fileName;
+	$url = 'http://ar-learn.appspot.com/uploadServiceWithUrl?runId='.$runId.'&account='.substr($userToken, 1).'&fileName='.$fileName;
+	$uploadUrl = callARLearnAPI('POST', $url, $data, $userToken);
+	//debugWespotARLearn(print_r($results, true));
+	return $uploadUrl;
 }
 
 function getResponseValueField($type, $value) {
@@ -367,7 +382,6 @@ function createARLearnTask($usertoken, $runId, $generalItemId, $itemType, $itemV
 
 	// register task on ARLEarn
 	$url = $serviceRootARLearn.'rest/response';
-	$results = callARLearnAPI('POST', $url, $data, $usertoken);
 	// userEmail example: "5:username" (it's the user token without first ":")
 	$data = '{
 		 "type": "org.celstec.arlearn2.beans.run.Response",

@@ -44,6 +44,21 @@ $collection = get_entity($collectionGuid);
 $collectionType = $collection->task_type;
 $itemValue = null;
 
+
+$runId = getRunIdForGame($collection->arlearn_gameid);
+
+if ($runId==null) {
+	debugWespotARLearn("The game associated with the given gameId ($collection->arlearn_gameid) was not found.");
+	register_error("The item could not be uploaded.");
+	forward(REFERER);
+}
+
+elgg_load_library('elgg:wespot_arlearnservices');
+$userGuid = elgg_get_logged_in_user_guid();
+$userToken = getUserToken($userGuid);
+
+
+
 if (isset($_FILES['file_to_upload'])) {
 
 	# Check that the file_to_upload field has only be defined for items that are associated with files (e.g., no textual or numeric items).
@@ -69,7 +84,8 @@ if (isset($_FILES['file_to_upload'])) {
     [error] => UPLOAD_ERR_OK  (= 0)
     [size] => 123   (the size in bytes)
 	*/
-	// GET URL after request: itemValue
+	$uploadUrl = createFileUploadURL($userToken, $runId, $_FILES['file_to_upload']['name']);
+	//system_message($uploadUrl);
 	register_error('Files cannot be processed: not yet implemented.');
 	forward(REFERER);
 } else if (isset($_POST[$collectionType])) { // numeric and text
@@ -81,17 +97,6 @@ if (isset($_FILES['file_to_upload'])) {
 }
 
 
-$runId = getRunIdForGame($collection->arlearn_gameid);
-
-if ($runId==null) {
-	debugWespotARLearn("The game associated with the given gameId ($collection->arlearn_gameid) was not found.");
-	register_error("The item could not be uploaded.");
-	forward(REFERER);
-}
-
-elgg_load_library('elgg:wespot_arlearnservices');
-$userGuid = elgg_get_logged_in_user_guid();
-$userToken = getUserToken($userGuid);
 $response = json_decode( createARLearnTask($userToken, $runId, $collection->arlearn_id, $collectionType, $itemValue) );
 //system_message(print_r($response, true));
 
