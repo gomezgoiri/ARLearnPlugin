@@ -26,6 +26,7 @@ $title = elgg_echo('wespot_arlearn:add:item');
 elgg_push_breadcrumb($title);
 
 $vars = array(
+	'parent_guid' => $parent_guid,
     'guid' => $collection_guid
 );
 $content = elgg_view_form('wespot_arlearn/add_item', array(
