@@ -307,7 +307,7 @@ function editARLearnTask($usertoken, $gameid, $title, $description, $tasktype, $
 	$data .= '}';
 	debugWespotARLearn('ADDING TASK: '.print_r($data, true));
 
-	$results = callARLearnAPI("POST", $url, $data, $usertoken);
+	$results = callARLearnAPI('POST', $url, $data, $usertoken);
 	debugWespotARLearn('ADDING TASK RESULTS: '.print_r($results, true));
 	return $results;
 }
@@ -323,7 +323,7 @@ function deleteARLearnTaskTop($usertoken, $gameid, $taskid) {
 	global $serviceRootARLearn;
 
 	$url = $serviceRootARLearn.'rest/generalItems/gameId/'.$gameid.'/generalItem/'.$taskid;
-	$results = callARLearnAPI("DELETE", $url, "", $usertoken);
+	$results = callARLearnAPI('DELETE', $url, "", $usertoken);
 	return $results;
 }
 
@@ -337,7 +337,47 @@ function deleteARLearnTask($usertoken, $responseId) {
 	global $serviceRootARLearn;
 
 	$url = $serviceRootARLearn.'rest/response/responseId/'.$responseId;
-	$results = callARLearnAPI("DELETE", $url, "", $usertoken);
+	$results = callARLearnAPI('DELETE', $url, "", $usertoken);
+	return $results;
+}
+
+function getResponseValueField($type, $value) {
+	$possibleFields = array(
+		'picture' => 'imageUrl',
+		'video' => 'videoUrl',
+		'audio' => 'audioUrl',
+		'text' => 'text',
+		'numeric' => 'value');
+	$type = $possibleFields[$type];
+	// TODO is numeric also passed as String?
+	return '"{\"'.$type.'\": \"'.$value.'\"}"';
+}
+
+/**
+ * Create a new task on ARLearn.
+ * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
+ * @param $runId
+ * @param $generalItemId
+ * @param $itemType 'text', 'numeric', 'video', 'audio' or 'picture'
+ * @param $itemValue value of the collection item to create (e.g., URL or a value)
+ * @return false, if the attempt failed, else the response data from the ARLearn service call (will be a json string).
+ */
+function createARLearnTask($usertoken, $runId, $generalItemId, $itemType, $itemValue) {
+	global $serviceRootARLearn;
+
+	// register task on ARLEarn
+	$url = $serviceRootARLearn.'rest/response';
+	$results = callARLearnAPI('POST', $url, $data, $usertoken);
+	// userEmail example: "5:username" (it's the user token without first ":")
+	$data = '{
+		 "type": "org.celstec.arlearn2.beans.run.Response",
+		 "userEmail": "'.substr($usertoken, 1).'",
+		 "runId": '.addcslashes($runId,"\"'\n").',
+		 "generalItemId": '.$generalItemId.',
+		 "responseValue": '.getResponseValueField($itemType, $itemValue).'
+	}';
+	$results = callARLearnAPI('POST', $url, $data, $usertoken);
+	//debugWespotARLearn(print_r($results, true));
 	return $results;
 }
 

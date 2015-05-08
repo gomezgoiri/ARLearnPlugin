@@ -3,9 +3,6 @@
  * Upload a file or create an item in a collection.
  */
 
-$collection_guid = get_input('collection_guid');
-$collection = get_entity($collection_guid);
-
 
 function extensionBelongsToType($collection_type, $filetype) {
 	$allowedTypes = array();
@@ -19,8 +16,34 @@ function extensionBelongsToType($collection_type, $filetype) {
 	return in_array($filetype, $allowedTypes);
 }
 
+function getUserToken($userGuid) {
+	$ownerprovider = elgg_get_plugin_user_setting('provider', $userGuid, 'elgg_social_login');
+	$owneroauth = str_replace("{$ownerprovider}_", '', elgg_get_plugin_user_setting('uid', $userGuid, 'elgg_social_login'));
+	return createARLearnUserToken($ownerprovider, $owneroauth);
+}
 
+function getRunIdForGame($gameId) {
+	$gamearray = elgg_get_entities_from_metadata(array(
+      'type' => 'object',
+      'subtype' => 'arlearngame',
+      'metadata_name_value_pairs' => array(
+          array(
+            name => 'arlearn_gameid',
+            value => $gameId
+          )
+       )
+    ));
+    if (!$gamearray || count($gamearray)!=1) return null;
+    return $gamearray[0]->arlearn_runid;
+}
+
+
+
+$collectionGuid = get_input('collection_guid');
+$collection = get_entity($collectionGuid);
 $collectionType = $collection->task_type;
+$itemValue = null;
+
 if (isset($_FILES['file_to_upload'])) {
 
 	# Check that the file_to_upload field has only be defined for items that are associated with files (e.g., no textual or numeric items).
@@ -34,7 +57,7 @@ if (isset($_FILES['file_to_upload'])) {
 	# The form already limits the types of files that can be uploaded, but it is better to double-check it.
 	$ftype = $_FILES['file_to_upload']['type'];
 	if ( !extensionBelongsToType($collectionType, $ftype) ) {
-		register_error("The collection only contains items of type '$collection->task_type' and you tried to upload a '$ftype'.");
+		register_error("The collection only contains items of type '$collectionType' and you tried to upload a '$ftype'.");
 		forward(REFERER);
 	}
 
@@ -46,12 +69,46 @@ if (isset($_FILES['file_to_upload'])) {
     [error] => UPLOAD_ERR_OK  (= 0)
     [size] => 123   (the size in bytes)
 	*/
+	// GET URL after request: itemValue
+	register_error('Files cannot be processed: not yet implemented.');
+	forward(REFERER);
 } else if (isset($_POST[$collectionType])) { // numeric and text
-	$value = $_POST[$collectionType];
-	system_message($value);
+	$itemValue = $_POST[$collectionType];
+	//system_message($itemValue);
 } else {
 	register_error("The collection only has items of type $collectionType.");
 	forward(REFERER);
 }
+
+
+$runId = getRunIdForGame($collection->arlearn_gameid);
+
+if ($runId==null) {
+	debugWespotARLearn("The game associated with the given gameId ($collection->arlearn_gameid) was not found.");
+	register_error("The item could not be uploaded.");
+	forward(REFERER);
+}
+
+elgg_load_library('elgg:wespot_arlearnservices');
+$userGuid = elgg_get_logged_in_user_guid();
+$userToken = getUserToken($userGuid);
+$response = json_decode( createARLearnTask($userToken, $runId, $collection->arlearn_id, $collectionType, $itemValue) );
+//system_message(print_r($response, true));
+
+// Process response for task creation in ARLearn
+if (isset($response->responseId)) {
+	// Successful request
+	// Directly add it (don't wait for the collection update)
+	elgg_load_library('elgg:wespot_arlearn');
+	saveTask($collectionGuid, $response, $userGuid, $runId);
+	forward("wespot_arlearn/view/$collectionGuid/$collection->title");
+} else {
+	// Error field should be defined if the 'responseId' field does not exist.
+	// So the following guard is unneeded: if (isset($datareturned->error)
+	register_error($response->error);
+	forward(REFERER);
+}
+
+
 ?>
 
