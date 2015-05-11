@@ -76,14 +76,6 @@ if (isset($_FILES['file_to_upload'])) {
 		forward(REFERER);
 	}
 
-	//system_message(print_r($_FILES['file_to_upload'], true));
-	/*
-  	[name] => MyFile.txt (comes from the browser, so treat as tainted)
-    [type] => text/plain  (not sure where it gets this from - assume the browser, so treat as tainted)
-    [tmp_name] => /tmp/php/php1h4j1o (could be anywhere on your system, depending on your config settings, but the user has no control, so this isn't tainted)
-    [error] => UPLOAD_ERR_OK  (= 0)
-    [size] => 123   (the size in bytes)
-	*/
 	$fileName = $_FILES['file_to_upload']['name'];
 	$uploadUrl = createFileUploadURL($userToken, $runId, $fileName);
 	$response = callARLearnAPIPostFile($uploadUrl, $_FILES['file_to_upload'], $userToken);
@@ -98,7 +90,11 @@ if (isset($_FILES['file_to_upload'])) {
 	}
 } else if (isset($_POST[$collectionType])) { // numeric and text
 	$itemValue = $_POST[$collectionType];
-	//system_message($itemValue);
+
+	if ($collectionType=='numeric' && !is_numeric($itemValue)) {
+		register_error('A numeric collection can only contain numbers. You tried to submit an incorrect value: '.$itemValue.'.');
+		forward(REFERER);
+	}
 } else {
 	register_error("The collection only has items of type $collectionType.");
 	forward(REFERER);
