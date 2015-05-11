@@ -76,18 +76,12 @@ if (isset($_FILES['file_to_upload'])) {
 		forward(REFERER);
 	}
 
-	$fileName = $_FILES['file_to_upload']['name'];
-	$uploadUrl = createFileUploadURL($userToken, $runId, $fileName);
-	$response = callARLearnAPIPostFile($uploadUrl, $_FILES['file_to_upload'], $userToken);
-	if (!$response) {
+	$uploadUrl = createFileUploadURL($userToken, $runId, $_FILES['file_to_upload']['name']);
+	$itemValue = uploadFile($uploadUrl, $_FILES['file_to_upload'], $userToken, $runId);
+	if (!$itemValue) {
 		debugWespotARLearn('Error uploading file to ARLearn server.');
 		register_error(elgg_echo('wespot_arlearn:add:item:failure'));
 		forward(REFERER);
-	} else {
-		$user = substr($userToken, 1);
-		global $serviceRootARLearn;
-		$url = $serviceRootARLearn.
-		$itemValue = 'http://'.$serviceRootARLearn."uploadService/$runId/$user/$fileName";
 	}
 } else if (isset($_POST[$collectionType])) { // numeric and text
 	$itemValue = $_POST[$collectionType];

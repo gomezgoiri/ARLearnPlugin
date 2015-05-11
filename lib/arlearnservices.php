@@ -321,7 +321,6 @@ function editARLearnTask($usertoken, $gameid, $title, $description, $tasktype, $
  */
 function deleteARLearnTaskTop($usertoken, $gameid, $taskid) {
 	global $serviceRootARLearn;
-
 	$url = $serviceRootARLearn.'rest/generalItems/gameId/'.$gameid.'/generalItem/'.$taskid;
 	$results = callARLearnAPI('DELETE', $url, "", $usertoken);
 	return $results;
@@ -352,6 +351,21 @@ function createFileUploadURL($userToken, $runId, $fileName) {
 	$url = $serviceRootARLearn.'uploadServiceWithUrl?runId='.$runId.'&account='.substr($userToken, 1).'&fileName='.$fileName;
 	$uploadUrl = callARLearnAPI('POST', $url, $data, $userToken);
 	return $uploadUrl;
+}
+
+/**
+ * Uploads file to the given URL.
+ * @param $url the url to use
+ * @param $file, the file to upload (as received in PHP's $_FILES array)
+ * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
+ * @param $runId
+ * @return false, if the call failed, else the URL of the newly uploaded file.
+ */
+function uploadFile($url, $file, $userToken, $runId) {
+	global $serviceRootARLearn;
+	$response = callARLearnAPIPostFile($url, $file, $userToken);
+	if (!$response) return false;
+	return 'http://'.$serviceRootARLearn."uploadService/$runId/".substr($userToken, 1).'/'.$file['name'];
 }
 
 function getResponseValueField($type, $value) {
@@ -435,7 +449,7 @@ function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
  * @param $url the url to use
  * @param $file, the file to upload (as received in PHP's $_FILES array)
  * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
- * @return false, if the call failed, else the response data from the call (will be a json string).
+ * @return false, if the call failed, else the response data from the call.
  */
 function callARLearnAPIPostFile($url, $file, $usertoken="") {
 	$httpHeader = array('Content-Type: multipart/form-data');
