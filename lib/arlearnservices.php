@@ -349,10 +349,8 @@ function deleteARLearnTask($usertoken, $responseId) {
  */
 function createFileUploadURL($userToken, $runId, $fileName) {
 	global $serviceRootARLearn;
-	//$url = $serviceRootARLearn.'uploadServiceWithUrl?runId='.$runId.'&account='.substr($userToken, 1).'&fileName='.$fileName;
-	$url = 'http://ar-learn.appspot.com/uploadServiceWithUrl?runId='.$runId.'&account='.substr($userToken, 1).'&fileName='.$fileName;
+	$url = $serviceRootARLearn.'uploadServiceWithUrl?runId='.$runId.'&account='.substr($userToken, 1).'&fileName='.$fileName;
 	$uploadUrl = callARLearnAPI('POST', $url, $data, $userToken);
-	//debugWespotARLearn(print_r($results, true));
 	return $uploadUrl;
 }
 
@@ -418,7 +416,7 @@ function getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken=""
 }
 
 /**
- * Makes service calls using Curl for the parameters given
+ * Makes service call using Curl for the parameters given
  * @param $method POST/PUT/GET/DELETE
  * @param $url the url to use
  * @param $jsondata, the data to send to the url if any
@@ -426,9 +424,39 @@ function getARLearnRunResults($usertoken, $runid, $fromtime, $resumptiontoken=""
  * @return false, if the call failed, else the response data from the call (will be a json string).
  */
 function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
+	$httpHeader = array(
+		'Content-Type: application/json',
+	    'Content-Length:'.strlen($jsondata));
+	return callARLearnAPIGeneral($method, $url, $jsondata, $httpHeader, $usertoken);
+}
+
+/**
+ * Makes service call (HTTP POST) using Curl for the parameters given
+ * @param $url the url to use
+ * @param $file, the file to upload (as received in PHP's $_FILES array)
+ * @param $usertoken the ARLearn user token to append to the app key when sending the onBehalfOf token (as created with function createARLearnUserToken)
+ * @return false, if the call failed, else the response data from the call (will be a json string).
+ */
+function callARLearnAPIPostFile($url, $file, $usertoken="") {
+	$httpHeader = array('Content-Type: multipart/form-data');
+	$filedata = $file['tmp_name'];
+	$postFields = array("filedata" => "@$filedata", "filename" => $file['name']);
+	return callARLearnAPIGeneral('POST', $url, $postFields, $httpHeader, $usertoken, $file['size']);
+}
+
+function callARLearnAPIGeneral($method, $url, $postdata, $httpHeader, $usertoken, $filesize=null) {
 	global $weSpotElggARLearnKey;
 
-	debugWespotARLearn("HTTP ".$method."  http://".$url." (body: ".$jsondata.")");
+	debugWespotARLearn("HTTP ".$method."  http://".$url);
+	if (is_array($postdata)) {
+		$data = '';
+		foreach ($postdata as $field) {
+			$data .= $field.'; ';
+		}
+		debugWespotARLearn("    (body: $data)");
+	} else {
+		debugWespotARLearn("    (body: $postdata)");
+	}
 
 	$curl = curl_init();
 	//For the record, when the webserver is behind a proxy we should use:
@@ -465,16 +493,18 @@ function callARLearnAPI($method, $url, $jsondata, $usertoken="") {
 	} else {
 		$sendkey = $weSpotElggARLearnKey;
 	}
+	array_push($httpHeader, 'Authorization: '.$sendkey);
 
 	//debugWespotARLearn('sendkey=: '.print_r($sendkey, true));
 
     curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_POSTFIELDS, $jsondata);
+	curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($curl, CURLOPT_HTTPHEADER, array(
-	    'Content-Type: application/json',
-	    'Authorization: '.$sendkey,
-	    'Content-Length:'.strlen($jsondata)));
+	curl_setopt($curl, CURLOPT_HTTPHEADER, $httpHeader);
+	if ($filesize!=null) {
+		curl_setopt($curl, CURLOPT_HEADER, true);
+		curl_setopt($curl, CURLOPT_INFILESIZE, $filesize);
+	}
 
 	$response = curl_exec($curl);
 	$httpCode = curl_getinfo( $curl, CURLINFO_HTTP_CODE );

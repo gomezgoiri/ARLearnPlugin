@@ -84,10 +84,18 @@ if (isset($_FILES['file_to_upload'])) {
     [error] => UPLOAD_ERR_OK  (= 0)
     [size] => 123   (the size in bytes)
 	*/
-	$uploadUrl = createFileUploadURL($userToken, $runId, $_FILES['file_to_upload']['name']);
-	//system_message($uploadUrl);
-	register_error('Files cannot be processed: not yet implemented.');
-	forward(REFERER);
+	$fileName = $_FILES['file_to_upload']['name'];
+	$uploadUrl = createFileUploadURL($userToken, $runId, $fileName);
+	$response = callARLearnAPIPostFile($uploadUrl, $_FILES['file_to_upload'], $userToken);
+	if (!$response) {
+		register_error('Error uploading the file to ARLearn server.');
+		forward(REFERER);
+	} else {
+		$user = substr($userToken, 1);
+		global $serviceRootARLearn;
+		$url = $serviceRootARLearn.
+		$itemValue = 'http://'.$serviceRootARLearn."uploadService/$runId/$user/$fileName";
+	}
 } else if (isset($_POST[$collectionType])) { // numeric and text
 	$itemValue = $_POST[$collectionType];
 	//system_message($itemValue);
