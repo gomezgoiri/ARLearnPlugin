@@ -1,3 +1,3 @@
-<?php
-	$result = '<input type="number" name="'.$vars['name'].'">';
-?>
+
+
+<input type="number" name="<?php echo $vars['name']; ?>">
