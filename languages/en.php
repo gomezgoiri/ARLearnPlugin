@@ -16,7 +16,7 @@ $english = array(
 	'wespot_arlearn:friends' => "Friends' data collection tasks",
 	'wespot_arlearn:all' => "All site data collection tasks",
 	'wespot_arlearn:add' => "Add data collection task",
-	'wespot_arlearn:add_item' => "Add item to the collection task",
+	'wespot_arlearn:add:item' => "Add item to the collection task",
 
 	/**
 	 * Using 'group' does not work - has old cached version with task at end
@@ -78,6 +78,13 @@ $english = array(
 	'wespot_arlearn:error:no_save_user' => 'The new user could not be added to the group inquiry at this time. Possibly due to communication errors with the ARLearn services.',
 	'wespot_arlearn:delete:success' => 'The task was successfully deleted.',
 	'wespot_arlearn:delete:failure' => 'The task could not be deleted.',
+	// New
+	'wespot_arlearn:add:item:success' => 'The task was successfully deleted.',
+	'wespot_arlearn:add:item:numeric:failure' => 'A numeric collection can only contain numbers. You tried to submit an incorrect value: %s.',
+	'wespot_arlearn:add:item:missing_field' => 'Field missing in the form submitted.',
+	'wespot_arlearn:add:item:incorrect_file_field' => 'You are not expected to upload a file for items of type %s.',
+	'wespot_arlearn:add:item:incorrect_file_type' => 'The collection only contains items of type "%s" and you tried to upload a "%s".',
+	'wespot_arlearn:add:item:failure' => 'Error uploading the file.',
 	/**
 	 * Export Messages
 	 */

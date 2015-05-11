@@ -49,7 +49,7 @@ $runId = getRunIdForGame($collection->arlearn_gameid);
 
 if ($runId==null) {
 	debugWespotARLearn("The game associated with the given gameId ($collection->arlearn_gameid) was not found.");
-	register_error("The item could not be uploaded.");
+	register_error(elgg_echo('wespot_arlearn:add:item:failure'));
 	forward(REFERER);
 }
 
@@ -64,7 +64,7 @@ if (isset($_FILES['file_to_upload'])) {
 	# Check that the file_to_upload field has only be defined for items that are associated with files (e.g., no textual or numeric items).
 	$uploadTypes = array('picture', 'video', 'audio');
 	if (!in_array($collectionType, $uploadTypes)) {
-		register_error("You are not expected to upload a file for items of type $collectionType.");
+		register_error(elgg_echo('wespot_arlearn:add:item:incorrect_file_field', array($collectionType)));
 		forward(REFERER);
 	}
 
@@ -72,7 +72,7 @@ if (isset($_FILES['file_to_upload'])) {
 	# The form already limits the types of files that can be uploaded, but it is better to double-check it.
 	$ftype = $_FILES['file_to_upload']['type'];
 	if ( !extensionBelongsToType($collectionType, $ftype) ) {
-		register_error("The collection only contains items of type '$collectionType' and you tried to upload a '$ftype'.");
+		register_error(elgg_echo('wespot_arlearn:add:item:incorrect_file_type', array($collectionType, $ftype)));
 		forward(REFERER);
 	}
 
@@ -80,7 +80,8 @@ if (isset($_FILES['file_to_upload'])) {
 	$uploadUrl = createFileUploadURL($userToken, $runId, $fileName);
 	$response = callARLearnAPIPostFile($uploadUrl, $_FILES['file_to_upload'], $userToken);
 	if (!$response) {
-		register_error('Error uploading the file to ARLearn server.');
+		debugWespotARLearn('Error uploading file to ARLearn server.');
+		register_error(elgg_echo('wespot_arlearn:add:item:failure'));
 		forward(REFERER);
 	} else {
 		$user = substr($userToken, 1);
@@ -92,11 +93,11 @@ if (isset($_FILES['file_to_upload'])) {
 	$itemValue = $_POST[$collectionType];
 
 	if ($collectionType=='numeric' && !is_numeric($itemValue)) {
-		register_error('A numeric collection can only contain numbers. You tried to submit an incorrect value: '.$itemValue.'.');
+		register_error(elgg_echo('wespot_arlearn:add:item:numeric:failure', array($itemValue)));
 		forward(REFERER);
 	}
 } else {
-	register_error("The collection only has items of type $collectionType.");
+	register_error(elgg_echo('wespot_arlearn:add:item:missing_field'));
 	forward(REFERER);
 }
 
