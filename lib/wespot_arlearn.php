@@ -554,10 +554,7 @@ function wespot_arlearn_upsert_task($data, $game, $group) {
   $task->description = $data->richText;
   $task->task_type = '';
 
-  if ($data->openQuestion->withAudio) {
-    $task_type = 'audio';
-  } 
-  else if ($data->openQuestion->withText) {
+  if ($data->openQuestion->withText) {
     $task_type = 'text';  
   }
   else if ($data->openQuestion->withValue) {
@@ -569,6 +566,9 @@ function wespot_arlearn_upsert_task($data, $game, $group) {
   else if ($data->openQuestion->withVideo) {
     $task_type = 'video';
   }
+  else if ($data->openQuestion->withAudio) {
+    $task_type = 'audio';
+  } 
   $task->task_type = $task_type;
 
   elgg_set_ignore_access(true);
