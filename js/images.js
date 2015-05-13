@@ -25,6 +25,14 @@ $(function() {
 		});
 	});
 
+	$(".elgg-list .elgg-body audio").each(function() {
+		// Only this.duration and this.readyState seem to change from an invalid video to a valid one.
+		if( isNaN(this.duration) ) {
+			var videoSrc = $("source", this).attr('src');
+			$('<p>Problems playing it? Try downloading it <a href="' + videoSrc + '" target="_blank">here</a>.</p>').insertAfter(this);
+		}
+	});
+
 	$(".fancybox").fancybox({
 		/* None of these options seem to work in Safari :-S
 		height: $(window).height()*0.8,*/
