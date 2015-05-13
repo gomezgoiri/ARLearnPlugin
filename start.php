@@ -77,15 +77,15 @@ function wespot_arlearn_init() {
 	elgg_register_plugin_hook_handler('permissions_check', 'object', 'wespot_arlearn_write_permission_check');
 	elgg_register_plugin_hook_handler('container_permissions_check', 'object', 'wespot_arlearn_container_permission_check');
 
+	// Access permissions
+	//elgg_register_plugin_hook_handler('access:collections:write', 'all', 'wespot_arlearn_write_acl_plugin_hook');
+	//elgg_register_plugin_hook_handler('access:collections:read', 'all', 'wespot_arlearn_read_acl_plugin_hook');
+
 	// icon url override
 	elgg_register_plugin_hook_handler('entity:icon:url', 'object', 'wespot_arlearn_icon_url_override');
 
 	// register ecml views to parse
 	elgg_register_plugin_hook_handler('get_views', 'ecml', 'wespot_arlearn_ecml_views_hook');
-
-	// Access permissions
-	//elgg_register_plugin_hook_handler('access:collections:write', 'all', 'wespot_arlearn_write_acl_plugin_hook');
-	//elgg_register_plugin_hook_handler('access:collections:read', 'all', 'wespot_arlearn_read_acl_plugin_hook');
 
 	// MB: NEW FOR WESPOT
 	// HANDLE GROUP ADD/EDIT AND DELETE TO TALK TO ARLEARN TO SETUP GAMES,RUNS AND PEOPLE
@@ -309,15 +309,6 @@ function wespot_arlearn_entity_menu_setup($hook, $type, $return, $params) {
 		return $return;
 	}
 
-	// remove delete if not owner or admin
-	if (!elgg_is_admin_logged_in() && elgg_get_logged_in_user_guid() != $entity->getOwnerGuid()) {
-		foreach ($return as $index => $item) {
-			if ($item->getName() == 'delete') {
-				unset($return[$index]);
-			}
-		}
-	}
-
 	$options = array(
 		'name' => 'history',
 		'text' => elgg_echo('wespot_arlearn:history'),
@@ -396,11 +387,16 @@ function wespot_arlearn_write_permission_check($hook, $entity_type, $returnvalue
 	}
 
 	$subtype = $params['entity']->getSubtype();
-	if ($subtype=='arlearntask_top' || $subtype=='arlearntask') {
+	if ($subtype=='arlearntask_top') {
+		$collection = $params['entity'];
+		$user = $params['user'];
+		return ($user->guid == $collection->owner_guid);
+	} else if ($subtype=='arlearntask') {
 		$task = $params['entity'];
 		$user = $params['user'];
-		return ($user->guid == $task->owner_guid);
-	} // else
+		$collection = get_entity($task->parent_guid);
+		return ($user->guid == $task->owner_guid || $user->guid == $collection->owner_guid);
+	}
 	return $returnvalue;
 }
 
@@ -418,7 +414,7 @@ function wespot_arlearn_container_permission_check($hook, $entity_type, $returnv
 		return true;
 	}
 
-	if (elgg_get_context() == "wespot_arlearn") {
+	if (elgg_get_context() == 'wespot_arlearn') {
 		if (elgg_get_page_owner_guid()) {
 			if (can_write_to_container(elgg_get_logged_in_user_guid(), elgg_get_page_owner_guid())) return true;
 		}
