@@ -102,6 +102,7 @@ $english = array(
 	 * History
 	 */
 	'wespot_arlearn:revision:subtitle' => 'Revision created %s by %s',
+	'wespot_arlearn:revision:status:failure' => 'The history could not be retrieved.',
 
 	/**
 	 * Widget

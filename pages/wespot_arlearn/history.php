@@ -5,8 +5,16 @@
 
 $task_guid = get_input('guid');
 $task = get_entity($task_guid);
-$container = $task->getContainerEntity();
 
+if (!$task) {
+	elgg_load_library('elgg:wespot_arlearnservices');
+	debugWespotARLearn("The entity with guid $task_guid could not be retrieved.");
+	register_error(elgg_echo('wespot_arlearn:revision:status:failure'));
+	forward(REFERER);
+}
+
+
+$container = $task->getContainerEntity();
 elgg_set_page_owner_guid($task->getContainerGUID());
 
 if (elgg_instanceof($container, 'group')) {
