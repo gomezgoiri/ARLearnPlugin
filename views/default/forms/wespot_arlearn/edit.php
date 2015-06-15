@@ -6,8 +6,12 @@
 $variables = elgg_get_config('wespot_arlearn');
 
 foreach ($variables as $name => $type) {
+    if ($type == 'access' || $type == 'write_access') {
+      echo '<div class="access_selector">';
+    } else {
+      echo '<div>';
+    }
 ?>
-<div>
 	<label><?php echo elgg_echo("wespot_arlearn:$name") ?></label>
 	<?php
 		if ($type != 'longtext') {
