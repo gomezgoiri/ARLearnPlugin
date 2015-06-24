@@ -97,6 +97,9 @@ function wespot_arlearn_init() {
 	elgg_register_plugin_hook_handler("action", "groups/join", "wespot_arlearn_group_join_action_hook");
  	elgg_register_plugin_hook_handler("action", "groups/leave", "wespot_arlearn_group_leave_action_hook");
 
+ 	// To show errors in file upload forms
+ 	elgg_register_js('upload', 'mod/wespot_arlearn/js/file.upload.js');
+
  	// To relayout items in collections (see view.php)
 	elgg_register_css('custom_layout', 'mod/wespot_arlearn/css/layout.css');
 	elgg_register_js('image_list', 'mod/wespot_arlearn/js/images.js');
