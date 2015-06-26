@@ -28,7 +28,7 @@ function getAcceptedTypes($task_type) {
 		$cType = $container->task_type;
 		if ($cType=='picture' || $cType=='video' || $cType=='audio') {
 			$maxSize = elgg_get_ini_setting_in_bytes('upload_max_filesize');
-			echo '<p>(maximum file size '.elgg_format_bytes($maxSize).')</p>';
+			echo '<p>('.elgg_echo('wespot_arlearn:max_file_size', array(elgg_format_bytes($maxSize))).')</p>';
 			
 			$inputId = 'uploadFile';
 			echo elgg_view('input/file', array(

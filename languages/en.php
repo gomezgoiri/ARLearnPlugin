@@ -62,6 +62,7 @@ $english = array(
 	'wespot_arlearn:access_id' => 'Read access',
 	'wespot_arlearn:write_access_id' => 'Write access',
 	'wespot_arlearn:item_value' => 'Item value',
+	'wespot_arlearn:max_file_size' => 'maximum file size: %s',
 
 	/**
 	 * Status and error messages
