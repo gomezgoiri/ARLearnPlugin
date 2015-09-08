@@ -32,14 +32,14 @@
 <h3>
 <a id="architecture" class="anchor" href="#architecture" aria-hidden="true"><span class="octicon octicon-link"></span></a>Architecture</h3>
 
-<p>The following diagram illustrates how the Elgg data collection plugin communicates with ARLearn cloud services to create and manage data collection tasks, This diagram highlights some components of the weSPOT architecture.</p>
+<p>The following diagram illustrates how the Elgg data collection plugin communicates with ARLearn cloud services to create and manage data collection tasks, This diagram highlights some components of the <a href="http://wespot.net/en_GB/software">weSPOT architecture</a>.</p>
 
 <p><img src="images/ElggDC.png" alt="Component diagram"></p>
 
 <p>Data Collection tasks are mapped on the ARLearn messaging framework. Within the weSPOT toolset, ARLearn concepts such as "Game", "Run" and "General Item" (message) are transparent for the end user. However, in order to create a data collection task, the Data Collection plugin uses the following ARLearn web services.</p>
 
 <ul>
-<li>Create a new ARLearn game. An ARLearn game corresponds to an inquiry and is a container for general items (messages). Read more about ARLearn games [here](<a href="http://portal.ou.nl/en/web/arlearn/game">http://portal.ou.nl/en/web/arlearn/game</a>.</li>
+<li>Create a new ARLearn game. An ARLearn game corresponds to an inquiry and is a container for general items (messages). Read more about ARLearn games <a href="http://portal.ou.nl/en/web/arlearn/game">here</a>.</li>
 <li>Create a new new ARLearn run. Just like an ARLearn game, an inquiry also corresponds to a run. In ARLearn, games can be repeated with different teams of user through the run concept. Within weSPOT this is not important, so only one run will exist for an inquiry/game. Read more about ARLearn runs <a href="http://portal.ou.nl/en/web/arlearn/run">here</a>.</li>
 <li>Finally, the data collection task will be created as a general item. As a result of this creation, ARLearn will send a notification to all users registered to the run/inquiry.</li>
 </ul>
