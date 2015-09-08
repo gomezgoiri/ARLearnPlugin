@@ -5,7 +5,7 @@ ARLearn Data Collection Tasks plugin integrates the data [collected by mobile ph
 
 The latest version of this plugin can be found in [its official repository](https://github.com/weSPOT/wespot_arlearn).
 
-For more documentation, please check [the plugin page](http://wespot.github.io/wespot_iwe/).
+For more documentation, please check [the plugin page](http://wespot.github.io/wespot_arlearn/).
  
 
 Credits
