@@ -11,7 +11,7 @@ For more documentation, please check [the plugin page](http://wespot.github.io/w
 Credits
 -------
 
-This plugin was build from the Tasks plugin 2.0 created by Fx Nion (http://community.elgg.org/plugins/385043/2.0/tasks-plugin)
+This plugin was build from the [Tasks plugin 2.0](http://community.elgg.org/plugins/385043/2.0/tasks-plugin) created by Fx Nion.
 
 It was originally created by [Michelle Bachler](http://kmi.open.ac.uk/people/member/michelle-bachler) and extensively modified by [Aitor Gomez-Goiri](https://github.com/gomezgoiri) as part of the [WeSPOT project](http://wespot.net).
 
